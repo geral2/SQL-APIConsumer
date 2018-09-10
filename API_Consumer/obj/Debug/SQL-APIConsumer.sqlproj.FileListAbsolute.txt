@@ -1,0 +1,15 @@
+D:\Project\API_Consumer\API_Consumer\bin\Debug\SQL-APIConsumer.dacpac
+D:\Project\API_Consumer\API_Consumer\bin\Debug\API_Consumer.dll
+D:\Project\API_Consumer\API_Consumer\bin\Debug\API_Consumer.pdb
+D:\Project\API_Consumer\API_Consumer\bin\Debug\Newtonsoft.Json.dll
+D:\Project\API_Consumer\API_Consumer\bin\Debug\System.Net.Http.dll
+D:\Project\API_Consumer\API_Consumer\bin\Debug\System.Net.Http.xml
+D:\Project\API_Consumer\API_Consumer\bin\Debug\es\System.Net.Http.resources.dll
+D:\Project\API_Consumer\API_Consumer\obj\Debug\SQL-APIConsumer.sqlprojResolveAssemblyReference.cache
+D:\Project\API_Consumer\API_Consumer\obj\Debug\Model.xml
+D:\Project\API_Consumer\API_Consumer\obj\Debug\refactor.xml
+D:\Project\API_Consumer\API_Consumer\obj\Debug\postdeploy.sql
+D:\Project\API_Consumer\API_Consumer\obj\Debug\predeploy.sql
+D:\Project\API_Consumer\API_Consumer\obj\Debug\SQL-APIConsumer.sqlproj.CopyComplete
+D:\Project\API_Consumer\API_Consumer\obj\Debug\API_Consumer.dll
+D:\Project\API_Consumer\API_Consumer\obj\Debug\API_Consumer.pdb

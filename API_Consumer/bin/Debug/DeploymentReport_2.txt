@@ -1,0 +1,17 @@
+﻿** Highlights
+     Tables that will be rebuilt
+       None
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       None
+
+** User actions
+     Create
+       [API_Consumer] (Assembly)
+       [dbo].[APICaller_POST_Json] (Procedure)
+       [dbo].[GET_BankInfoBasicByRN] (Procedure)
+
+** Supporting actions
