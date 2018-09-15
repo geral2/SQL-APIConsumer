@@ -3,8 +3,8 @@ Welcome to SQL-APIConsumer project!. It's Database Project built in C# whose mai
 
 This project has two main procedures defined below:
 
-1. **APICaller_GET_Json (SqlString URL)**
-1. **APICaller_POST_Json(SqlString URL, SqlString JsonBody)**
+1. **APICaller_GET(SqlString URL)**
+1. **APICaller_POST(SqlString URL, SqlString JsonBody)**
 
 It include 3rd one, that is basically an example of how to implement a customized method that return a result set based in a Data transfer object (DTO).
 
