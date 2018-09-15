@@ -66,13 +66,13 @@
     <Folder Include="Consumers" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Procedures\APICaller_POST_Json.cs" />
+    <Compile Include="Procedures\APICaller_POST.cs" />
     <Compile Include="Consumers\APIConsumer.cs" />
     <Compile Include="Consumers\Helper.cs" />
     <Compile Include="DTO\BankInfoBasic.cs" />
     <Compile Include="DTO\BankInfoDetail.cs" />
     <Compile Include="Procedures\GET_BankInfoBasicByRN.cs" />
-    <Compile Include="Procedures\APICaller_GET_Json.cs" />
+    <Compile Include="Procedures\APICaller_GET.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

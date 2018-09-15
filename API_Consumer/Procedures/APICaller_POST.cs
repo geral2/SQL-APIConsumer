@@ -14,7 +14,7 @@ public partial class StoredProcedures
     /// <param name="URL">Consumer POST Method of Api</param>
     /// <param name="JsonBody">Json to be sent as body</param>
     [Microsoft.SqlServer.Server.SqlProcedure]
-    public static void APICaller_POST_Json(SqlString URL, SqlString JsonBody)
+    public static void APICaller_POST(SqlString URL, SqlString JsonBody)
     {
         try
         {
@@ -25,7 +25,7 @@ public partial class StoredProcedures
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message.ToString());
+            Helper.SendResultValue("Error", ex.Message.ToString());
         }
     }
 }
