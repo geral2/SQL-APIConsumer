@@ -74,5 +74,41 @@ namespace SQLAPI_Consumer
                 SqlContext.Pipe.SendResultsEnd();
             }
         }
+
+        /// <summary>
+        /// Static method used to send an empty Result to SQL.
+        /// </summary>
+        /// <param name="ColumnName">Name of column showed in SQL Result set.</param>
+        public static void SendEmptyResult(string ColumnName)
+        {
+            SqlDataRecord Record = new SqlDataRecord(new SqlMetaData[] { new SqlMetaData(ColumnName, SqlDbType.VarChar, 4000) });
+
+            SqlContext.Pipe.SendResultsStart(Record);
+
+            if (SqlContext.Pipe.IsSendingResults)
+            {
+                SqlContext.Pipe.SendResultsRow(Record);
+
+                SqlContext.Pipe.SendResultsEnd();
+            }
+        }
+
+        /// <summary>
+        /// Static method used to send an empty ResultSet to SQL.
+        /// </summary>
+        /// <param name="ColumnNames">Set of columns to be showed in SQL Result set.</param>
+        public static void SendEmptyResult(SqlMetaData[] Header)
+        {
+            SqlDataRecord Record = new SqlDataRecord(Header);
+
+            SqlContext.Pipe.SendResultsStart(Record);
+
+            if (SqlContext.Pipe.IsSendingResults)
+            {
+                SqlContext.Pipe.SendResultsRow(Record);
+
+                SqlContext.Pipe.SendResultsEnd();
+            }
+        }
     }
 }

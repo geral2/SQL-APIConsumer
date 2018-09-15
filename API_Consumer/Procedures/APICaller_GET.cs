@@ -13,7 +13,7 @@ public partial class StoredProcedures
     /// </summary>
     /// <param name="URL">Api GET Method</param>
     [Microsoft.SqlServer.Server.SqlProcedure]
-    public static void APICaller_GET_Json (SqlString URL)
+    public static void APICaller_GET (SqlString URL)
     {
         try
         {
@@ -24,7 +24,7 @@ public partial class StoredProcedures
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message.ToString());
+            Helper.SendResultValue("Result", ex.Message.ToString());
         }
     }
 }
