@@ -35,7 +35,7 @@ public partial class StoredProcedures
     /// <param name="URL">Api GET Method</param>
     /// <param name="Token">Authorization Token</param>
     [Microsoft.SqlServer.Server.SqlProcedure]
-    public static void APICaller_GET(SqlString URL, SqlString Token)
+    public static void APICaller_GET_Auth(SqlString URL, SqlString Token)
     {
         try
         {

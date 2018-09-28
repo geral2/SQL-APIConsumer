@@ -20,11 +20,10 @@ D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\bin\Debug\Newtonsoft.Json
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\bin\Debug\System.Net.Http.dll
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\bin\Debug\System.Net.Http.xml
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\bin\Debug\es\System.Net.Http.resources.dll
-D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\SQL-APIConsumer.sqlprojResolveAssemblyReference.cache
+D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\SQL-APIConsumer.sqlproj.CopyComplete
+D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\API_Consumer.dll
+D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\API_Consumer.pdb
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\Model.xml
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\refactor.xml
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\postdeploy.sql
 D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\predeploy.sql
-D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\SQL-APIConsumer.sqlproj.CopyComplete
-D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\API_Consumer.dll
-D:\Project\docker-mastery\SQL-APIConsumer\API_Consumer\obj\Debug\API_Consumer.pdb

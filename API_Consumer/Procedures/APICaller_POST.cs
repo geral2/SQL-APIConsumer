@@ -37,7 +37,7 @@ public partial class StoredProcedures
     /// <param name="Token">Authorization Token</param>
     /// <param name="JsonBody">Json to be sent as body</param>
     [Microsoft.SqlServer.Server.SqlProcedure]
-    public static void APICaller_POST(SqlString URL, SqlString Token, SqlString JsonBody)
+    public static void APICaller_POST_Auth(SqlString URL, SqlString Token, SqlString JsonBody)
     {
         try
         {
