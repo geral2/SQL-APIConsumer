@@ -3,3 +3,5 @@
 ################################################################################
 
 /.vs/SQL-APIConsumer/v15/Server/sqlite3/db.lock
+/API_Consumer/SQL-APIConsumer.dbmdl
+/API_Consumer/SQL-APIConsumer.jfm
