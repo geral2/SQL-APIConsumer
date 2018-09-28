@@ -6,6 +6,12 @@ This project has two main procedures defined below:
 1. **APICaller_GET(SqlString URL)**
 1. **APICaller_POST(SqlString URL, SqlString JsonBody)**
 
+THe same also support Authentications header like Token or JWT.
+
+1. **APICaller_GETAuth(SqlString URL, SqlString Token)**
+1. **APICaller_POSTAuth(SqlString URL, SqlString JsonBody, SqlString Token)**
+(More info in the wiki)
+
 It include 3rd one, that is basically an example of how to implement a customized method that return a result set based in a Data transfer object (DTO).
 
 PD:
