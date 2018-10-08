@@ -16,3 +16,102 @@ It include 3rd one, that is basically an example of how to implement a customize
 
 PD:
 It uses HttpWebRequest instead of HttpClient in order to avoid having to use unsupported assemblies by SQL Server.
+
+# How to...
+
+### **Deployment Instruction**
+###### **STEP 1**
+`CREATE DATABASE TestDB;`
+`GO`
+###### **STEP 2**
+`USE TestDB`
+`GO`
+`sp_configure 'clr enabled',1`
+`RECONFIGURE`
+`GO`
+###### **STEP 3**
+`ALTER DATABASE TESTDB SET TRUSTWORTHY ON`
+`GO`
+###### **STEP 4**
+`CREATE ASSEMBLY [System.Runtime.Serialization]`
+`AUTHORIZATION	dbo`
+`FROM  N'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.Serialization.dll'`
+`WITH PERMISSION_SET = UNSAFE--external_access`
+`GO`
+###### **STEP 5**
+`CREATE ASSEMBLY [Newtonsoft.Json]`
+`AUTHORIZATION dbo`
+`FROM  N'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Newtonsoft.Json.dll'`
+`WITH PERMISSION_SET = UNSAFE`
+ `go`
+###### **STEP 6**
+ 
+`CREATE ASSEMBLY [API_Consumer]`
+`AUTHORIZATION dbo`
+`FROM  N'C:\CLR\API_Consumer.dll'`
+`WITH PERMISSION_SET = UNSAFE`
+
+`GO`
+###### **STEP 7**
+`PRINT N'Creating [dbo].[APICaller_GET_Json]...';`
+`GO`
+`CREATE PROCEDURE [dbo].[APICaller_GET_Json]`
+`@URL NVARCHAR (MAX) NULL`
+`AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_GET_Json]`
+
+### **Sample of calling Get Method**
+-- How to consume GET API
+-- How to show Json results.
+
+`DECLARE @RoutingNumber AS VARCHAR(50) = '122242597'`
+
+`--Public API: routingnumbers.info`
+`DECLARE @Url  VARCHAR(200) = CONCAT('https://www.routingnumbers.info/api/name.json?','rn=',@RoutingNumber) `
+
+`DECLARE @Results AS TABLE`
+`(`
+	`Context varchar(max)`
+`)`
+
+`DECLARE @Result AS VARCHAR(MAX)`
+
+`INSERT INTO @Results`
+`EXEC  [dbo].[APICaller_GET_Json] @Url`
+
+`--Result: Row per value `
+
+ `SELECT  B.*`
+  `FROM (`
+			`SELECT Context `
+			  `from @Results`
+		`)tb`
+	`OUTER APPLY OPENJSON  (context) B`
+
+`--Result: column per value.`
+`SELECT `
+		`[name]	`
+		`,[rn]		`
+		`,[message]	`
+		`,[code]	`
+ `FROM (`
+			`SELECT Context `
+			  `from @Results`
+		`)tb`
+	`OUTER APPLY OPENJSON  (context)  `
+  `WITH`
+    `( [name]		VARCHAR(20) '$.name'`
+	`, [rn]			VARCHAR(20) '$.rn'`
+	`, [message]		VARCHAR(20) '$.message'`
+	`, [code]		INT			'$.code'`
+    `);`
+
+### **Sample of calling Authentication Get/POST Method**
+
+     EXEC [dbo].APICaller_POST  
+	   @URL = ' http://localhost:5000/api/auth/login'
+	, @Body = '{"username": "geraldo","password": "password"}'
+
+ 
+	EXEC [dbo].APICaller_GETAuth 
+	    @URL = 'http://localhost:5000/api/values'
+	   , @Token = 'Bearer aeyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxIiwidW5pcXVlX25hbWUiOiJnZXJhbGRvIiwibmJmIjoxNTM4MTA3NDkxLCJleHAiOjE1MzgxOTM4OTEsImlhdCI6MTUzODEwNzQ5MX0.j9kX5KXJP6yHBJZZK07tNQayyUkuQf8CtoDDDwdPISZy0eb9RQvnooB3oMND54-5Yzv5LMO9nuM69t2PJh5iXw'
