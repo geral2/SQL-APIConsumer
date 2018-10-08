@@ -107,11 +107,23 @@ It uses HttpWebRequest instead of HttpClient in order to avoid having to use uns
 
 ### **Sample of calling Authentication Get/POST Method**
 
-     EXEC [dbo].APICaller_POST  
-	   @URL = ' http://localhost:5000/api/auth/login'
-	, @Body = '{"username": "geraldo","password": "password"}'
-
- 
-	EXEC [dbo].APICaller_GETAuth 
-	    @URL = 'http://localhost:5000/api/values'
-	   , @Token = 'Bearer aeyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxIiwidW5pcXVlX25hbWUiOiJnZXJhbGRvIiwibmJmIjoxNTM4MTA3NDkxLCJleHAiOjE1MzgxOTM4OTEsImlhdCI6MTUzODEwNzQ5MX0.j9kX5KXJP6yHBJZZK07tNQayyUkuQf8CtoDDDwdPISZy0eb9RQvnooB3oMND54-5Yzv5LMO9nuM69t2PJh5iXw'
+    DECLARE @Result AS TABLE
+    (
+        Token VARCHAR(MAX)
+    )
+    
+    INSERT INTO @Result
+    
+     exec  [dbo].[APICaller_POST]
+    	 @URL = 'http://localhost:5000/api/auth/login'
+    	,@BodyJson = '{"Username":"gdiaz","Password":"password"}'
+    
+    DECLARE @Token AS VARCHAR(MAX)
+    
+    SELECT TOP 1 @Token = CONCAT('Bearer ',Json.Token)
+     FROM @Result
+      CROSS APPLY ( SELECT value AS Token FROM OPENJSON(Result)) AS [Json]
+    
+    EXEC [dbo].[APICaller_GETAuth] 
+         @URL	  = 'http://localhost:5000/api/values'
+       , @Token = @Token
