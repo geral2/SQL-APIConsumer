@@ -60,6 +60,12 @@ FROM  N'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Newtonsoft.Json.dll'
 WITH PERMISSION_SET = UNSAFE
 ```
 
+###### **STEP 5**
+Copy CLR entire folder to disk C:\ or an alernative path that do you want.
+
+```
+C:\CLR
+```
 ### Installing
 
 Now we are ready to install (create) the clr objects of SQL-APIConsumer. Let's do it!.
