@@ -2,6 +2,8 @@
 
 Welcome to SQL-APIConsumer project!. It's Database Project built in C# whose main purpose it's allow consuming API GET/POST methods on SQL Server through CLR generics stored procedures.
 
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/master/Diagram.png)
+
 ## Getting Started
 
 This project has two main procedures defined below:
