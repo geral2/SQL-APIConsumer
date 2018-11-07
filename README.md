@@ -90,7 +90,7 @@ PRINT N'Creating [dbo].[APICaller_GET]...';
 GO
 CREATE PROCEDURE [dbo].[APICaller_GET]
 @URL NVARCHAR (MAX) NULL
-AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_GET_Json]
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_GET]
 ```
 
 ```
@@ -138,7 +138,7 @@ DECLARE @Results AS TABLE
 DECLARE @Result AS VARCHAR(MAX)
 
 INSERT INTO @Results
-EXEC  [dbo].[APICaller_GET_Json] @Url
+EXEC  [dbo].[APICaller_GET] @Url
 
 --Result: Row per value 
 
