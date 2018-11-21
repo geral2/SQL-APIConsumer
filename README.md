@@ -1,6 +1,6 @@
 # SQL-APIConsumer
 
-Welcome to SQL-APIConsumer project!. It's Database Project built in C# whose main purpose it's allow consuming API GET/POST methods on SQL Server through CLR generics stored procedures.
+Welcome to SQL-APIConsumer project!. It's Database Project built in C# whose main purpose it's allow consuming API GET/POST methods on SQL Server through CLR generics stored procedures. Keep in mind that it was developed and tested on **SQL Server 2016 and later versions**. If you need to deploy in an older version read the **Built with** section.
 
 ![alt text](https://github.com/geral2/SQL-APIConsumer/blob/master/Diagram.png)
 
@@ -43,7 +43,7 @@ ALTER DATABASE TESTDB SET TRUSTWORTHY ON
 ```
 
 ###### **STEP 3**
-Create Assembly System.Runtim.Serialization from .Net Framework.
+Create Assembly System.Runtim.Serialization from .Net Framework. Confirm what version of .Net you have installed and modify the path below with the correct one.
 
 ```
 CREATE ASSEMBLY [System.Runtime.Serialization]
@@ -199,7 +199,11 @@ Make sure that the user on your SQL Server instance have grant access to CLR Fol
 ## Built With
 
 * [C#](https://www.microsoft.com/en-us/download/details.aspx?id=7029/) - CLR develop in C# in .net framework 4.5.
-* [SQL Server 2008+](https://www.microsoft.com/es-es/sql-server//) - Could be deployed in SQL server 2008 or later.
+* [SQL Server 2016+](https://www.microsoft.com/es-es/sql-server//) - Could be deployed in SQL server 2016 or later.
+
+If you are working in an older version like 2008 or 2012 you would need to keep this in mind:
+1. SQL 2012 does not allow default parameters for CLR (Default parameter values for CLR types, nvarchar(max), varbinary(max), and xml are not supported.)
+1. OPENJSON is not available for SQL 2012. You won't be able to use OPENJSON statement since it was introduced in SQL 2016. As alternative you could use this [function](https://www.red-gate.com/simple-talk/sql/t-sql-programming/consuming-json-strings-in-sql-server/).
 
 ## Contributing
 
