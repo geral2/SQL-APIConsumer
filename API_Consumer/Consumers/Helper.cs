@@ -61,7 +61,7 @@ namespace SQLAPI_Consumer
         /// <param name="Value">Value to be sent.</param>
         public static void SendResultValue(string ColumnName, string Value)
         {
-            SqlDataRecord Record = new SqlDataRecord(new SqlMetaData[] { new SqlMetaData(ColumnName, SqlDbType.VarChar, 4000) });
+            SqlDataRecord Record = new SqlDataRecord(new SqlMetaData[] { new SqlMetaData(ColumnName, SqlDbType.VarChar, SqlMetaData.Max) });
 
             SqlContext.Pipe.SendResultsStart(Record);
 
@@ -81,7 +81,7 @@ namespace SQLAPI_Consumer
         /// <param name="ColumnName">Name of column showed in SQL Result set.</param>
         public static void SendEmptyResult(string ColumnName)
         {
-            SqlDataRecord Record = new SqlDataRecord(new SqlMetaData[] { new SqlMetaData(ColumnName, SqlDbType.VarChar, 4000) });
+            SqlDataRecord Record = new SqlDataRecord(new SqlMetaData[] { new SqlMetaData(ColumnName, SqlDbType.VarChar, SqlMetaData.Max) });
 
             SqlContext.Pipe.SendResultsStart(Record);
 
