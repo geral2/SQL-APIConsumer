@@ -63,7 +63,8 @@ WITH PERMISSION_SET = UNSAFE
 ```
 
 ###### **STEP 5**
-Copy CLR entire folder to disk C:\ or an alernative path that do you want.
+Copy the folder named CLR to the following path "C:\" or any another alernative path which you can get access throught SQL. 
+Keep in mind, if you used a different path you will also neeed to modify the script of Installing/STEP 1. 
 
 ```
 C:\CLR
