@@ -63,12 +63,17 @@ WITH PERMISSION_SET = UNSAFE
 ```
 
 ###### **STEP 5**
-Copy the folder named CLR to the following path "C:\" or any another alernative path which you can get access throught SQL. 
-Keep in mind, if you used a different path you will also neeed to modify the script of Installing/STEP 1. 
+Create a new folder named CLR to the following path "C:\" or any another desired path which you can get access throught SQL.
+And copy the .dll below from ...\API_Consumer\bin\Debug:
+1. API_Consumer.dll
+1. Newtonsoft.Json.dll
+1. System.Net.Http.dll  
 
 ```
 C:\CLR
 ```
+Keep in mind, if you used a different path you will also neeed to modify the script of Installing/STEP 1   
+
 ### Installing
 
 Now we are ready to install (create) the clr objects of SQL-APIConsumer. Let's do it!.
