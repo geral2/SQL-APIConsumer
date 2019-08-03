@@ -73,6 +73,7 @@
     <Compile Include="DTO\BankInfoDetail.cs" />
     <Compile Include="Procedures\GET_BankInfoBasicByRN.cs" />
     <Compile Include="Procedures\APICaller_GET.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -91,4 +92,8 @@
     <None Include="API_Consumer.publish.xml" />
     <None Include="Key.pfx" />
   </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

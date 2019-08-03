@@ -52,6 +52,20 @@ FROM  N'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.Serializa
 WITH PERMISSION_SET = UNSAFE--external_access
 ```
 
+If you are getting the error msg 15404, you should try the script below first. After that runs Step 3 again. 
+
+```
+USE [TestDB]
+GO
+EXEC dbo.sp_changedbowner @loginame = N'sa', @map = false
+GO
+WITH PERMISSION_SET = UNSAFE--external_access
+```
+Error mentioned above:
+Msg 15404, Level 16, State 11, Line 1
+Could not obtain information about Windows NT group/user 'xxxuser', error code 0x534.
+ 
+
 ###### **STEP 4**
 Create Assembly Newtonsoft.Json. If It doesn't exists you need to download and copy it in this path.
 

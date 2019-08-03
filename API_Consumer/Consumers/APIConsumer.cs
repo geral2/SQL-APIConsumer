@@ -31,9 +31,9 @@ namespace SQLAPI_Consumer
         /// </summary>
         /// <param name="url">API URL</param>
         /// <param name="JsonBody">Content Application By Default Json</param>
-        /// <param name="Token">Header Authorization token</param>
+        /// <param name="Authorization">Header Authorization token, user-passwrod, JWT, etc.</param>
         /// <returns>String Api result</returns>
-        public static string POSTMethod(string url, string JsonBody, string Token = "")
+        public static string POSTMethod(string url, string JsonBody, string Authorization = "")
         {
             string ContentResult = string.Empty ;
             try
@@ -42,8 +42,8 @@ namespace SQLAPI_Consumer
                 request.ContentType = CONTENTTYPE;
                 request.Method = POST_WebMethod; 
 
-                if (!String.IsNullOrEmpty(Token))
-                    request.Headers.Add(HttpRequestHeader.Authorization, Token);
+                if (!String.IsNullOrEmpty(Authorization))
+                    request.Headers.Add(HttpRequestHeader.Authorization, Authorization);
 
                 using (var streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
@@ -71,9 +71,9 @@ namespace SQLAPI_Consumer
         /// Request GET Method to the URL API provided.
         /// </summary>
         /// <param name="url">API URL</param>
-        /// <param name="Token">Header Authorization Token</param>
+        /// <param name="Authorization">Header Authorization</param>
         /// <returns>String Api result</returns>
-        public static string GETMethod(string url, string Token = "")
+        public static string GETMethod(string url, string Authorization = "")
         {
             string ContentResult = string.Empty;
             try
@@ -82,8 +82,8 @@ namespace SQLAPI_Consumer
                 request.ContentType = CONTENTTYPE;
                 request.Method = GET_WebMethod;
 
-                if (!String.IsNullOrEmpty(Token))
-                    request.Headers.Add(HttpRequestHeader.Authorization, Token);
+                if (!String.IsNullOrEmpty(Authorization))
+                    request.Headers.Add(HttpRequestHeader.Authorization, Authorization);
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
@@ -106,9 +106,9 @@ namespace SQLAPI_Consumer
         /// </summary>
         /// <param name="url">API URL</param>
         /// <param name="Id">Id</param>
-        /// <param name="Token">Authorization Token</param>
+        /// <param name="Authorization">Authorization</param>
         /// <returns>String Api result</returns>
-        public static string GETMethod(string url, string Id, string Token = "")
+        public static string GETMethod(string url, string Id, string Authorization = "")
         {
             string ContentResult = string.Empty;
             try
@@ -117,8 +117,8 @@ namespace SQLAPI_Consumer
                 request.ContentType = CONTENTTYPE;
                 request.Method = GET_WebMethod;
 
-                if (!string.IsNullOrEmpty(Token))
-                    request.Headers.Add(HttpRequestHeader.Authorization, Token);
+                if (!string.IsNullOrEmpty(Authorization))
+                    request.Headers.Add(HttpRequestHeader.Authorization, Authorization);
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
@@ -141,9 +141,9 @@ namespace SQLAPI_Consumer
         /// </summary>
         /// <typeparam name="T">Object used to deserialize the result</typeparam>
         /// <param name="url">API URL</param>
-        /// <param name="Token">Authorization token</param>
+        /// <param name="Authorization">Authorization header</param>
         /// <returns>String Api result</returns>
-        public static string GETMethod<T>(string url, ref T ObjectResult, string Token = "")
+        public static string GETMethod<T>(string url, ref T ObjectResult, string Authorization = "")
         {
             string ContentResult = string.Empty;
             try
@@ -152,8 +152,8 @@ namespace SQLAPI_Consumer
                 request.ContentType = CONTENTTYPE;
                 request.Method = GET_WebMethod;
 
-                if (!string.IsNullOrEmpty(Token))
-                    request.Headers.Add(HttpRequestHeader.Authorization, Token);
+                if (!string.IsNullOrEmpty(Authorization))
+                    request.Headers.Add(HttpRequestHeader.Authorization, Authorization);
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
@@ -177,9 +177,9 @@ namespace SQLAPI_Consumer
         /// </summary>
         /// <typeparam name="T">Object used to deserialize the result</typeparam>
         /// <param name="url">API URL</param>
-        /// <param name="Token">Authorization token</param>
+        /// <param name="Authorization">Authorization header</param>
         /// <returns>String Api result</returns>
-        public static string GETMethod<T>(string url, string Id, ref T ObjectResult, string Token = "")
+        public static string GETMethod<T>(string url, string Id, ref T ObjectResult, string Authorization = "")
         {
             string ContentResult = string.Empty;
             try
@@ -188,8 +188,8 @@ namespace SQLAPI_Consumer
                 request.ContentType = CONTENTTYPE;
                 request.Method = GET_WebMethod;
 
-                if (!string.IsNullOrEmpty(Token))
-                    request.Headers.Add(HttpRequestHeader.Authorization, Token);
+                if (!string.IsNullOrEmpty(Authorization))
+                    request.Headers.Add(HttpRequestHeader.Authorization, Authorization);
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))

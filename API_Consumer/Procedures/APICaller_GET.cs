@@ -33,13 +33,13 @@ public partial class StoredProcedures
     /// Returns the result as a varchar(max). Could be used to return Json.
     /// </summary>
     /// <param name="URL">Api GET Method</param>
-    /// <param name="Token">Authorization Token</param>
+    /// <param name="Authorization">Authorization Header</param>
     [Microsoft.SqlServer.Server.SqlProcedure]
-    public static void APICaller_GET_Auth(SqlString URL, SqlString Token)
+    public static void APICaller_GET_Auth(SqlString URL, SqlString Authorization)
     {
         try
         {
-            string Result = APIConsumer.GETMethod(URL.ToString(), Token.ToString());
+            string Result = APIConsumer.GETMethod(URL.ToString(), Authorization.ToString());
 
             Helper.SendResultValue("Result", Result);
 
