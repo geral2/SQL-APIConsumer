@@ -1,6 +1,9 @@
 using Microsoft.SqlServer.Server;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SQLAPI_Consumer
 {
@@ -109,6 +112,39 @@ namespace SQLAPI_Consumer
 
                 SqlContext.Pipe.SendResultsEnd();
             }
+        }
+
+        private static readonly Encoding SignatureEncoding = Encoding.UTF8;
+
+        /// <summary>
+        /// public method to return that return SHA256
+        /// </summary>
+        /// <param name="message">parameters in URL</param>
+        /// <param name="secret">SK</param>
+        /// <returns>string SHA256</returns>
+        public static string CreateSignature(string message, string secret)
+        {
+
+            byte[] keyBytes = SignatureEncoding.GetBytes(secret);
+            byte[] messageBytes = SignatureEncoding.GetBytes(message);
+            HMACSHA256 hmacsha256 = new HMACSHA256(keyBytes);
+
+            byte[] bytes = hmacsha256.ComputeHash(messageBytes);
+
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
+
+        /// <summary>
+        /// Timestamp for signature
+        /// </summary>
+        /// <returns>string</returns>
+        public static string GetTimestamp()
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var timestamp  = (long)(DateTime.Now.ToUniversalTime() - epoch).TotalMilliseconds;
+            return timestamp.ToString();
+            //long milliseconds = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();  
+            //return milliseconds.ToString();
         }
     }
 }
