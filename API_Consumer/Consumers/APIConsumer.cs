@@ -38,21 +38,27 @@ namespace SQLAPI_Consumer
         /// <returns>String Api result</returns>
         public static string POSTMethod(string url, string JsonBody, string Authorization = "")
         {
-            string ContentResult = string.Empty ;
+            string ContentResult = string.Empty;
             try
             {
-                SetSSL();
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                       | SecurityProtocolType.Ssl3;
+
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 request.ContentType = CONTENTTYPE;
-                request.Method = POST_WebMethod; 
+                request.Method = POST_WebMethod;
 
                 if (!String.IsNullOrEmpty(Authorization))
                     request.Headers.Add(HttpRequestHeader.Authorization, Authorization);
 
-                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                if (!String.IsNullOrEmpty(JsonBody))
                 {
-                    streamWriter.Write(JsonBody);
-                    streamWriter.Flush();
+                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        streamWriter.Write(JsonBody);
+                        streamWriter.Flush();
+                    }
                 }
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
@@ -70,6 +76,68 @@ namespace SQLAPI_Consumer
                     var result = reader.ReadToEnd();
                     ContentResult = result;
                 }
+            }
+            catch (Exception ex)
+            {
+                ContentResult = ex.Message.ToString();
+                throw ex;
+            }
+
+            return ContentResult;
+        }
+
+
+        /// <summary>
+        /// POST to Resful API sending Json body.
+        /// </summary>
+        /// <param name="url">API URL</param>
+        /// <param name="JsonBody">Content Application By Default Json</param>
+        /// <returns>String Api result</returns>
+        public static string POSTMethod(string url, string JsonBody)
+        {
+            string ContentResult = string.Empty ;
+            try
+            {
+                SetSSL();
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.ContentType = CONTENTTYPE;
+                request.Method = POST_WebMethod;
+
+                if (!String.IsNullOrEmpty(JsonBody))
+                {
+                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        streamWriter.Write(JsonBody);
+                        streamWriter.Flush();
+                    }
+                }
+
+                var httpResponse = (HttpWebResponse)request.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader?.ReadToEnd();
+                    ContentResult = result;
+                }
+            }
+            catch (WebException ex)
+            {
+                using (var stream = ex.Response?.GetResponseStream())
+                {
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
+                    
+                }
+                
             }
             catch (Exception ex)
             {
@@ -125,11 +193,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -169,11 +246,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -221,11 +307,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -279,11 +374,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -324,11 +428,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -370,11 +483,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -416,11 +538,20 @@ namespace SQLAPI_Consumer
             }
             catch (WebException ex)
             {
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                using (var stream = ex.Response?.GetResponseStream())
                 {
-                    var result = reader.ReadToEnd();
-                    ContentResult = result;
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                    }
                 }
             }
             catch (Exception ex)
@@ -434,9 +565,10 @@ namespace SQLAPI_Consumer
 
         private static void SetSSL()
         {
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                   | SecurityProtocolType.Ssl3;
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = (senderX, certificate, chain, sslPolicyErrors) => { return true; };
+            //ServicePointManager.Expect100Continue = true;
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+            //       | SecurityProtocolType.Ssl3;
         }
     }
 }
