@@ -28,6 +28,7 @@ There are two Utilities methods or procedures;
 
 1. **GetTimestamp**
 1. **Create_HMACSHA256(SqlString value, SqlString Key)**
+1. **fn_GetBytes(SqlString value)**
 
 It include another one, that is basically an example of how to implement a customized method that return a result set based in a Data transfer object (DTO).
 
@@ -147,6 +148,15 @@ RETURNS NVARCHAR (MAX)
 AS
  EXTERNAL NAME [API_Consumer].[UserDefinedFunctions].[GetTimestamp]
 
+GO
+	PRINT N'Creating [dbo].[fn_GetBytes]...';
+GO
+CREATE FUNCTION [dbo].fn_GetBytes
+(@value NVARCHAR (MAX) NULL )
+RETURNS NVARCHAR (MAX)
+AS
+ EXTERNAL NAME [API_Consumer].[UserDefinedFunctions].fn_GetBytes
+GO
 ```
 
 ```
