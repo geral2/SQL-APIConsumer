@@ -146,5 +146,16 @@ namespace SQLAPI_Consumer
             //long milliseconds = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();  
             //return milliseconds.ToString();
         }
+
+        /// <summary>
+        /// Get string's array of bytes 
+        /// </summary>
+        /// <returns>Base64 string</returns>
+        public static string GetBytes_Encoding(string _value)
+        {
+            var byteArray = Encoding.ASCII.GetBytes(_value);
+
+            return Convert.ToBase64String(byteArray);
+        }
     }
 }

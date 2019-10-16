@@ -32,4 +32,16 @@ public partial class UserDefinedFunctions
         return valueReturned;
     }
 
+    /// <summary>
+    /// Get TimeStamp from server.
+    /// </summary>
+    /// <returns>string Timestamp</returns>
+    [Microsoft.SqlServer.Server.SqlFunction]
+    public static SqlString fn_GetBytes(SqlString value)
+    {
+        SqlString valueReturned = Helper.GetBytes_Encoding(
+                                                          value.ToString()
+                                                        );
+        return valueReturned;
+    }
 }
