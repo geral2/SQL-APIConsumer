@@ -270,6 +270,9 @@ SELECT
 	, [code]		INT			'$.code'
     );
 ```
+
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/master/APICaller_GET%20ResultSet.png)
+
 ### **Sample of calling multiples headers Get Method**
 ```
   use TESTER
@@ -310,6 +313,8 @@ SELECT  *
 				) a
 	
 ```
+
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/master/APICaller_GET_headers%20ResultSet.png)
 
 ### **Sample of calling Authentication Get/POST Method**
 ```
