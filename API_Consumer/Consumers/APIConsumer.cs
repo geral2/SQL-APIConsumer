@@ -566,9 +566,10 @@ namespace SQLAPI_Consumer
         private static void SetSSL()
         {
             System.Net.ServicePointManager.ServerCertificateValidationCallback = (senderX, certificate, chain, sslPolicyErrors) => { return true; };
-            //ServicePointManager.Expect100Continue = true;
-            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-            //       | SecurityProtocolType.Ssl3;
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                                                 | SecurityProtocolType.Ssl3 
+                                                 | (SecurityProtocolType)3072;
         }
     }
 }
