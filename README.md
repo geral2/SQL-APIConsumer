@@ -205,9 +205,9 @@ AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_GET_Headers]
 
 GO
 
-GO
-
 PRINT N'Creating [dbo].[APICaller_GET_Headers_BODY]...';
+
+GO
 
 CREATE PROCEDURE [dbo].[APICaller_GET_Headers_BODY]
 @URL NVARCHAR (MAX) NULL, @JsonBody NVARCHAR (MAX) NULL, @Headers NVARCHAR (MAX) NULL
