@@ -14,7 +14,7 @@ This project has two main procedures defined below:
 The same also support Authentications header like Token or JWT.
 
 1. **APICaller_GETAuth(SqlString URL, SqlString Authorization)**
-1. **APICaller_POSTAuth(SqlString URL, SqlString JsonBody, SqlString Authorization)**
+1. **APICaller_POSTAuth(SqlString URL, SqlString Authorization, SqlString JsonBody)**
 (More info in the wiki)
 
 It even support sending multiples headers in a Json Format.
@@ -24,7 +24,21 @@ It even support sending multiples headers in a Json Format.
 1. **APICaller_GET_JsonBody_Header(SqlString URL, SqlString Headers, SqlString JsonBody)**
 1. **APICaller_POST_JsonBody_Header(SqlString URL, SqlString Headers, SqlString JsonBody)**
 
-There are two Utilities methods or procedures;
+1. **APICaller_POST_Encoded(SqlString URL, SqlString Headers, SqlString JsonBody)**
+This new procedure is exclusive for Calling API with enconded contentType (application/x-www-form-urlencoded).
+
+1. **APICaller_GET_Extended(SqlString URL, SqlString Headers, SqlString JsonBody)**
+1. **APICaller_POST_Extended(SqlString URL, SqlString Headers, SqlString JsonBody)**
+
+With these two extended procedures we are able to change the content-type, through the header parameter. 
+And return information related to HTTP Response like:
+- ContentType
+- Server
+- StatusCode
+- Status Description
+- Response Headers
+
+There are a few Utilities functions;
 
 1. **GetTimestamp**
 1. **Create_HMACSHA256(SqlString value, SqlString Key)**
@@ -215,15 +229,37 @@ AS EXTERNAL NAME [API_Consumer].[StoredProcedures].APICaller_GET_JsonBody_Header
 GO
 
 PRINT N'Creating [dbo].[APICaller_POST_Headers]...';
-
 GO
 CREATE PROCEDURE [dbo].[APICaller_POST_Headers]
 @URL NVARCHAR (MAX) NULL, @Headers NVARCHAR (MAX) NULL
 AS EXTERNAL NAME [API_Consumer].[StoredProcedures].APICaller_POST_Headers
 
+GO
+PRINT N'Creating [dbo].[APICaller_GET_Extended]...';
+GO
+CREATE PROCEDURE [dbo].[APICaller_GET_Extended]
+@URL NVARCHAR (MAX) NULL, @JsonBody NVARCHAR (MAX) NULL, @Headers NVARCHAR (MAX) NULL
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_GET_Extended]
+
+GO
+PRINT N'Creating [dbo].[APICaller_POST_Extended]...';
+GO
+CREATE PROCEDURE [dbo].[APICaller_POST_Extended]
+@URL NVARCHAR (MAX) NULL, @Headers NVARCHAR (MAX) NULL, @JsonBody NVARCHAR (MAX) NULL
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_POST_Extended]
+
+GO
+PRINT N'Creating [dbo].[APICaller_POST_Encoded]...';
+GO
+
+CREATE PROCEDURE [dbo].APICaller_POST_Encoded
+  @URL		NVARCHAR (MAX) NULL
+, @Headers	NVARCHAR (MAX) NULL
+, @JsonBody NVARCHAR (MAX) NULL
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].APICaller_POST_Encoded
 
 ```
-### **Sample of calling Get Method**
+### **Sample calling Get Method**
 -- How to consume GET API
 -- How to show Json results.
 
@@ -273,7 +309,7 @@ SELECT
 
 ![alt text](https://github.com/geral2/SQL-APIConsumer/blob/master/APICaller_GET%20ResultSet.png)
 
-### **Sample of calling multiples headers Get Method**
+### **Sample calling multiples headers Get Method**
 ```
   use TESTER
 go 
@@ -316,7 +352,74 @@ SELECT  *
 
 ![alt text](https://github.com/geral2/SQL-APIConsumer/blob/master/APICaller_GET_headers%20ResultSet.png)
 
-### **Sample of calling Authentication Get/POST Method**
+### **Sample calling Get Header Method Extended**
+
+```
+ --Script sample execution Calling Rapid API.
+
+--Set Header
+Declare @header nvarchar(max) = 
+  '[{
+		"Name": "Content-Type",
+		"Value" :"application/json; charset=utf-8"
+	},
+	{
+		"Name": "X-RapidAPI-Host",
+		"Value" :"restcountries-v1.p.rapidapi.com"
+	},{
+		"Name": "X-RapidAPI-Key",
+		"Value" :"c56b333d25mshdbfec15f02f096ep19fa94jsne5189032cf7d"
+	}]';
+--Set URL
+Declare @wurl varchar(max) = 'https://restcountries-v1.p.rapidapi.com/all' 
+
+Declare @ts as table
+(
+	Json_Result nvarchar(max),
+	ContentType varchar(100),
+	ServerName varchar(100),
+	Statuscode varchar(100),
+	Descripcion varchar(100),
+	Json_Headers nvarchar(max)
+)
+declare @i as int 
+ 
+ insert into @ts
+ --Get Account Data
+ exec @i = [dbo].[APICaller_GET_Headers_EXT]
+							@wurl
+							,''
+							,@header
+
+select * from @ts
+
+SELECT  * 
+ FROM OPENJSON((select Json_Result from @ts))  
+		WITH (   
+				 name				nvarchar(max) '$."name"'      
+				,alpha2Code			nvarchar(max) '$."alpha2Code"'      
+				,alpha3Code			nvarchar(max) '$."alpha3Code"'      
+				,callingCodes		nvarchar(max) '$."callingCodes"'  as JSON       
+				,capital			nvarchar(max) '$."capital"'      
+				,region				nvarchar(max) '$."region"'      
+				,subregion			nvarchar(max) '$."subregion"'  
+				,timezones			nvarchar(max) '$."timezones"'	  as JSON     
+				,population			nvarchar(max) '$."population"'      
+				,"currencies"		nvarchar(max) '$."currencies"'	  as JSON 
+				,languages			nvarchar(max) '$."languages"'	  as JSON         
+				) a
+
+SELECT  * 
+ FROM OPENJSON((select Json_Headers from @ts))  
+		WITH (   
+				 Header				nvarchar(max) '$."Name"'      
+				,Value		nvarchar(max) '$."Value"'      
+				) a
+```
+![Extended GET](https://user-images.githubusercontent.com/5836150/84343055-21835580-ab75-11ea-8353-e4178bdf85d2.png)
+
+
+### **Sample calling Authentication Get/POST Method**
 ```
     DECLARE @Result AS TABLE
     (
@@ -338,6 +441,19 @@ SELECT  *
     EXEC [dbo].[APICaller_GETAuth] 
          @URL	  = 'http://localhost:5000/api/values'
        , @Token = @Token
+```
+### **ADVICE**
+There are an issue reported related to the GAC, after Windows install .Net Framework updates sometimes cause the error below;
+
+```
+Could not load file or assembly 'System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089' or one of its dependencies. Assembly in host store has a different signature than assembly in GAC. (Exception from HRESULT: 0x80131050)
+```
+It can be fixed with the code below;
+
+```
+ALTER  ASSEMBLY [System.Runtime.Serialization] 
+FROM 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.Serialization.dll' 
+WITH PERMISSION_SET = UNSAFE
 ```
 
 ## Deployment
