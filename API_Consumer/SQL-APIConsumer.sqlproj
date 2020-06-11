@@ -27,6 +27,7 @@
     <AssemblyOriginatorKeyFile>Key.pfx</AssemblyOriginatorKeyFile>
     <PermissionSet>UNSAFE</PermissionSet>
     <TargetFrameworkProfile />
+    <DacVersion>2.1.0.0</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -78,6 +79,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DTO\Header.cs" />
     <Compile Include="Procedures\UtilFunctions.cs" />
+    <Compile Include="DTO\ExtendedResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

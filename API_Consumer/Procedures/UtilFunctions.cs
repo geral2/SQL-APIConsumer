@@ -33,14 +33,29 @@ public partial class UserDefinedFunctions
     }
 
     /// <summary>
-    /// Get TimeStamp from server.
+    /// Get Enconde ASCII string.
     /// </summary>
-    /// <returns>string Timestamp</returns>
+    /// <returns>string enconded</returns>
     [Microsoft.SqlServer.Server.SqlFunction]
     public static SqlString fn_GetBytes(SqlString value)
     {
         SqlString valueReturned = Helper.GetBytes_Encoding(
-                                                          value.ToString()
+                                                            ""
+                                                           ,value.ToString()
+                                                        );
+        return valueReturned;
+    }
+
+    /// <summary>
+    /// Get Enconde string ASCII-UTF8 from server.
+    /// </summary>
+    /// <returns>string enconded</returns>
+    [Microsoft.SqlServer.Server.SqlFunction]
+    public static SqlString fn_GetBytes_Ext(SqlString Enconde_type, SqlString value)
+    {
+        SqlString valueReturned = Helper.GetBytes_Encoding( 
+                                                            Enconde_type.ToString(),
+                                                            value.ToString()
                                                         );
         return valueReturned;
     }
