@@ -386,7 +386,7 @@ declare @i as int
  
  insert into @ts
  --Get Account Data
- exec @i = [dbo].[APICaller_GET_Headers_EXT]
+ exec @i = [dbo].[APICaller_GET_Extended]
 							@wurl
 							,''
 							,@header
