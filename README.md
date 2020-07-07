@@ -235,6 +235,15 @@ CREATE PROCEDURE [dbo].[APICaller_POST_Headers]
 AS EXTERNAL NAME [API_Consumer].[StoredProcedures].APICaller_POST_Headers
 
 GO
+PRINT N'Creating [dbo].[APICaller_POST_JsonBody_Header]...';
+GO
+CREATE PROCEDURE [dbo].[APICaller_POST_JsonBody_Header]
+	@URL NVARCHAR (MAX)  
+  , @Headers NVARCHAR (MAX)  
+  , @jSON NVARCHAR (MAX)  
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].APICaller_POST_JsonBody_Headers
+
+GO
 PRINT N'Creating [dbo].[APICaller_GET_Extended]...';
 GO
 CREATE PROCEDURE [dbo].[APICaller_GET_Extended]
