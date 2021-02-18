@@ -39,7 +39,3 @@ C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL
 C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\SQL-APIConsumer.sqlproj.CopyComplete
 C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\API_Consumer.dll
 C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\API_Consumer.pdb
-C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\Model.xml
-C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\refactor.xml
-C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\postdeploy.sql
-C:\Users\gdiaz\Documents\SQL Server Management Studio\SQL-APIConsumer-master\SQL-APIConsumer\API_Consumer\obj\Debug\predeploy.sql

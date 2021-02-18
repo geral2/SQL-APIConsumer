@@ -25,6 +25,12 @@ namespace SQLAPI_Consumer
         private const string CONTENTTYPE_URLENCODED = "application/x-www-form-urlencoded";
 
         /// <summary>
+        /// Header Content-Type needed in generic calls.
+        /// </summary>
+        private const string Header_ContentType= "Content-Type";
+        
+
+        /// <summary>
         /// Fixed string for POST method
         /// </summary>
         private const string POST_WebMethod = "POST";
@@ -53,6 +59,8 @@ namespace SQLAPI_Consumer
         /// DEFAULT_COLUMN_RESULT
         /// </summary>
         public const string DEFAULT_COLUMN_ERROR = "Error";
+
+        private enum ParamsName { webMethod , URL }
 
         /// <summary>
         /// POST to Resful API sending Json body.
@@ -255,7 +263,7 @@ namespace SQLAPI_Consumer
             {
                 SetSSL();
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                //request.ContentType = ContentType;
+               
                 request.Method = POST_WebMethod;
 
                 if (!string.IsNullOrEmpty(JsonHeaders))
@@ -266,7 +274,7 @@ namespace SQLAPI_Consumer
                     {
                         if (!string.IsNullOrEmpty(Header.Name) && !string.IsNullOrEmpty(Header.Value))
                         {
-                            if (Header.Name.Contains("Content-Type"))
+                            if (Header.Name.Contains(Header_ContentType))
                             {
                                 request.ContentType = Header.Value;
                             }
@@ -274,10 +282,16 @@ namespace SQLAPI_Consumer
                             {
                                 request.Headers.Add(Header.Name, Header.Value);
                             }
+
+                            // Set default Content-Type
+                            if (string.IsNullOrEmpty(request.ContentType))
+                            {
+                                request.ContentType = CONTENTTYPE;
+                            }
                         }
                     }
                 }
-
+                
                 if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
                 {
                     byte[] byteArray = System.Text.Encoding.UTF8.GetBytes((!String.IsNullOrEmpty(JsonBody)) ? JsonBody : "");
@@ -306,16 +320,19 @@ namespace SQLAPI_Consumer
                 }
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
+
+                if (httpResponse != null)
+                {
+                    extResult.ContentType = httpResponse.ContentType;
+                    extResult.Server = httpResponse.Server;
+                    extResult.StatusCode = ((int)httpResponse?.StatusCode).ToString();
+                    extResult.StatusDescription = httpResponse.StatusDescription;
+                }
+
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
                 {
                     var result = streamReader.ReadToEnd();
-                    ContentResult = result;
-
-                    extResult.ContentType = httpResponse.ContentType;
-                    extResult.Server = httpResponse.Server;
-                    extResult.Result = ContentResult;
-                    extResult.StatusCode = httpResponse.StatusCode.ToString();
-                    extResult.StatusDescription = httpResponse.StatusDescription;
+                    extResult.Result = ContentResult = result;
 
                     for (int i = 0; i < httpResponse.Headers.Count; ++i)
                     {
@@ -335,21 +352,40 @@ namespace SQLAPI_Consumer
                 {
                     if (stream != null)
                     {
+                        var response = ex.Response as HttpWebResponse;
+                        if (response != null)
+                        {
+                            extResult.StatusCode = ((int)response.StatusCode).ToString();
+                            extResult.StatusDescription = response.StatusDescription;
+                            extResult.ContentType = response.ContentType;
+                            extResult.Server = response.Server;
+                        }
+
                         using (var reader = new StreamReader(stream))
                         {
                             var result = reader.ReadToEnd();
-                            ContentResult = result;
+                            extResult.Result = ContentResult = result;
                         }
                     }
                     else
                     {
-                        ContentResult = ex.Message.ToString();
+                        extResult.Result = ContentResult = ex.Message.ToString();
+                        extResult.StatusCode = ((int) HttpStatusCode.InternalServerError).ToString();
+                        extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
+                    }
+
+                    if (string.IsNullOrEmpty(extResult.Result))
+                    {
+                        extResult.Result = ContentResult;
                     }
                 }
             }
             catch (Exception ex)
             {
                 ContentResult = ex.Message.ToString();
+                extResult.Result = ContentResult;
+                extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
+                extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
                 throw ex;
             }
 
@@ -803,13 +839,19 @@ namespace SQLAPI_Consumer
                     {
                         if (!string.IsNullOrEmpty(Header.Name) && !string.IsNullOrEmpty(Header.Value))
                         {
-                            if (Header.Name.Contains("Content-Type"))
+                            if (Header.Name.Contains(Header_ContentType))
                             {
                                 request.ContentType = Header.Value;
                             }
                             else
                             {
                                 request.Headers.Add(Header.Name, Header.Value);
+                            }
+
+                            // Set default Content-Type
+                            if (string.IsNullOrEmpty(request.ContentType))
+                            {
+                                request.ContentType = CONTENTTYPE;
                             }
                         }
 
@@ -844,15 +886,20 @@ namespace SQLAPI_Consumer
                 }
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+
+                if (httpResponse != null)
                 {
-                    var result = streamReader.ReadToEnd();
-                    ContentResult = result;
                     extResult.ContentType = httpResponse.ContentType;
                     extResult.Server = httpResponse.Server;
                     extResult.Result = ContentResult;
-                    extResult.StatusCode = httpResponse.StatusCode.ToString();
+                    extResult.StatusCode = ((int)httpResponse.StatusCode).ToString();
                     extResult.StatusDescription = httpResponse.StatusDescription;
+                }
+
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    extResult.Result = ContentResult = result;
 
                     for (int i = 0; i < httpResponse.Headers.Count; ++i)
                     {
@@ -865,6 +912,117 @@ namespace SQLAPI_Consumer
                                             );
                     }
 
+                }
+            }
+            catch (WebException ex)
+            {
+                using (var stream = ex.Response?.GetResponseStream())
+                {
+                    if (stream != null)
+                    {
+                        var response = ex.Response as HttpWebResponse;
+                        if (response != null)
+                        {
+                            extResult.StatusCode = ((int)response.StatusCode).ToString();
+                            extResult.StatusDescription = response.StatusDescription;
+                            extResult.ContentType = response.ContentType;
+                            extResult.Server = response.Server;
+                        }
+
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            extResult.Result = ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                        extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
+                        extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
+                    }
+
+                    if (string.IsNullOrEmpty(extResult.Result))
+                    {
+                        extResult.Result = ContentResult;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ContentResult = ex.Message.ToString();
+                extResult.Result = ContentResult;
+                extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
+                extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
+                throw ex;
+            }
+
+            return ContentResult;
+        }
+
+
+        /// <summary>
+        /// POST to Resful API sending Json body.
+        /// </summary>
+        /// <param name="url">API URL</param>
+        /// <param name="JsonBody">Content Application By Default Json</param>
+        /// <param name="JsonHeaders">Headers added in Json format: Authorization token, user-passwrod, JWT, etc.</param>
+        /// <returns>String Api result</returns>
+        public static string WebMethod(string httpMethod, string url, string JsonBody = "", string JsonHeaders = "")
+        {
+            string ContentResult = string.Empty;
+            try
+            {
+                SetSSL();
+
+                validateParams(ParamsName.webMethod, httpMethod);
+                validateParams(ParamsName.URL, url);
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+               // request.ContentType = Header_ContentType;
+                request.Method = httpMethod;
+
+
+                if (!string.IsNullOrEmpty(JsonHeaders))
+                {
+                    List<Headers> _headers = JsonConvert.DeserializeObject<List<Headers>>(JsonHeaders);
+
+                    foreach (var Header in _headers)
+                    {
+                        if (!string.IsNullOrEmpty(Header.Name) && !string.IsNullOrEmpty(Header.Value))
+                        {
+                            if (Header.Name.Contains(Header_ContentType))
+                            {
+                                request.ContentType = Header.Value;
+                            }
+                            else
+                            {
+                                request.Headers.Add(Header.Name, Header.Value);
+                            }
+
+                            // Set default Content-Type
+                            if (string.IsNullOrEmpty(request.ContentType))
+                            {
+                                request.ContentType = CONTENTTYPE;
+                            }
+                        }
+
+                    }
+                }
+
+                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                {
+                    if (!String.IsNullOrEmpty(JsonBody))
+                        streamWriter.Write(JsonBody);
+
+                    streamWriter.Flush();
+                }
+
+                var httpResponse = (HttpWebResponse)request.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    ContentResult = result;
                 }
             }
             catch (WebException ex)
@@ -892,6 +1050,201 @@ namespace SQLAPI_Consumer
             }
 
             return ContentResult;
+        }
+
+        /// <summary>
+        /// Generic web method request.
+        /// </summary>
+        /// <param name="extResult">DTO which will hold the result set</param>
+        /// <param name="httpMethod">Web method action</param>
+        /// <param name="url">URL</param>
+        /// <param name="JsonBody">Body</param>
+        /// <param name="Headers">Headers</param>
+        /// <returns></returns>
+        public static string WebMethod_Extended(ref ExtendedResult extResult, string httpMethod, string url, string JsonBody = "", string Headers = "")
+        {
+            string ContentResult = string.Empty;
+            try
+            {
+                SetSSL();
+
+                validateParams(ParamsName.webMethod, httpMethod);
+                validateParams(ParamsName.URL, url);
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+
+                request.Method = httpMethod;
+
+                if (!string.IsNullOrEmpty(Headers))
+                {
+                    List<Headers> _headers = JsonConvert.DeserializeObject<List<Headers>>(Headers);
+
+                    foreach (var Header in _headers)
+                    {
+                        if (!string.IsNullOrEmpty(Header.Name) && !string.IsNullOrEmpty(Header.Value))
+                        {
+                            if (Header.Name.Contains(Header_ContentType))
+                            {
+                                request.ContentType = Header.Value;
+                            }
+                            else
+                            {
+                                request.Headers.Add(Header.Name, Header.Value);
+                            }
+
+                            // Set default Content-Type
+                            if (string.IsNullOrEmpty(request.ContentType))
+                            {
+                                request.ContentType = CONTENTTYPE;
+                            }
+                        }
+
+                    }
+                }
+
+                if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
+                {
+                    byte[] byteArray = System.Text.Encoding.UTF8.GetBytes((!String.IsNullOrEmpty(JsonBody)) ? JsonBody : "");
+                    // Set the ContentLength property of the WebRequest.  
+                    request.ContentLength = byteArray.Length;
+
+                    using (var streamWriter = request.GetRequestStream())
+                    {
+                        streamWriter.Write(byteArray, 0, byteArray.Length);
+                        // Close the Stream object.  
+                        streamWriter.Close();
+                        // Get the response.  
+
+                        streamWriter.Flush();
+                    }
+                }
+                else if (!String.IsNullOrEmpty(JsonBody) 
+                        && !httpMethod.ToUpper().Contains("GET") )
+                {
+                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        streamWriter.Write(JsonBody);
+                        streamWriter.Flush();
+                    }
+                }
+
+                var httpResponse = (HttpWebResponse)request.GetResponse();
+
+                if (httpResponse != null)
+                {
+                    extResult.ContentType = httpResponse.ContentType;
+                    extResult.Server = httpResponse.Server;
+                    extResult.StatusCode = ((int)httpResponse.StatusCode).ToString();
+                    extResult.StatusDescription = httpResponse.StatusDescription;
+                }
+
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    extResult.Result = ContentResult = result;
+
+                    for (int i = 0; i < httpResponse.Headers.Count; ++i)
+                    {
+                        extResult.headers.Add(
+                                                   new Headers()
+                                                   {
+                                                       Name = httpResponse.Headers.Keys[i],
+                                                       Value = httpResponse.Headers[i]
+                                                   }
+                                            );
+                    }
+
+                }
+            }
+            catch (WebException ex)
+            {
+                using (var stream = ex.Response?.GetResponseStream())
+                {
+                    if (stream != null)
+                    {
+                        var response = ex.Response as HttpWebResponse;
+                        if (response != null)
+                        {
+                            extResult.StatusCode = ((int)response.StatusCode).ToString();
+                            extResult.StatusDescription = response.StatusDescription;
+                            extResult.ContentType = response.ContentType;
+                            extResult.Server = response.Server;
+                        }
+
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var result = reader.ReadToEnd();
+                            extResult.Result = ContentResult = result;
+                        }
+                    }
+                    else
+                    {
+                        ContentResult = ex.Message.ToString();
+                        extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
+                        extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
+                    }
+
+                    if (string.IsNullOrEmpty(extResult.Result))
+                    {
+                        extResult.Result = ContentResult;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ContentResult = ex.Message.ToString();
+                extResult.Result = ContentResult;
+                extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
+                extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
+                throw ex;
+            }
+
+            return ContentResult;
+        }
+
+        private static void validateParams(ParamsName pname, string paramVal)
+        {
+            string[] methods = { "POST", "GET", "PUT", "PATCH", "DELETE" };
+
+            switch (pname)
+            {
+                case ParamsName.webMethod:
+                    
+                    if (string.IsNullOrEmpty(paramVal) || !ContainAnyOf(paramVal, methods))
+                    {
+                        throw new ArgumentNullException(pname.ToString(), "Please provide a valid HTTP method (GET,POST,PUT,PATCH, DELETE).");
+                    }
+                    if (string.IsNullOrEmpty(paramVal))
+                    {
+                        throw new ArgumentNullException(pname.ToString(), "Please provide a valid HTTP method (GET,POST,PUT,PATCH, DELETE).");
+                    }
+
+                    break;
+                case ParamsName.URL:
+                    if (string.IsNullOrEmpty(paramVal))
+                    {
+                        throw new ArgumentNullException(pname.ToString(), "Please provide a valid URL.");
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Created this method to avoid using Contains from Linq library. (Less dependencies)
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        private static bool ContainAnyOf(string word, string[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (word.ToUpper() == array[i])
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static void SetSSL()
