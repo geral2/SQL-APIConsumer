@@ -874,13 +874,12 @@ namespace SQLAPI_Consumer
                         streamWriter.Flush();
                     }
                 }
-                else
+                else if (!String.IsNullOrEmpty(JsonBody)
+                      && !request.Method.ToUpper().Contains("GET"))
                 {
                     using (var streamWriter = new StreamWriter(request.GetRequestStream()))
                     {
-                        if (!String.IsNullOrEmpty(JsonBody))
-                            streamWriter.Write(JsonBody);
-
+                        streamWriter.Write(JsonBody);
                         streamWriter.Flush();
                     }
                 }
