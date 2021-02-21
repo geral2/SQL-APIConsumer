@@ -282,16 +282,16 @@ namespace SQLAPI_Consumer
                             {
                                 request.Headers.Add(Header.Name, Header.Value);
                             }
-
-                            // Set default Content-Type
-                            if (string.IsNullOrEmpty(request.ContentType))
-                            {
-                                request.ContentType = CONTENTTYPE;
-                            }
                         }
                     }
                 }
-                
+
+                // Set default Content-Type
+                if (string.IsNullOrEmpty(request.ContentType))
+                {
+                    request.ContentType = CONTENTTYPE;
+                }
+
                 if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
                 {
                     byte[] byteArray = System.Text.Encoding.UTF8.GetBytes((!String.IsNullOrEmpty(JsonBody)) ? JsonBody : "");
@@ -391,7 +391,6 @@ namespace SQLAPI_Consumer
 
             return ContentResult;
         }
-
 
         /// <summary>
         /// POST to Resful API sending Json body.
@@ -848,14 +847,15 @@ namespace SQLAPI_Consumer
                                 request.Headers.Add(Header.Name, Header.Value);
                             }
 
-                            // Set default Content-Type
-                            if (string.IsNullOrEmpty(request.ContentType))
-                            {
-                                request.ContentType = CONTENTTYPE;
-                            }
                         }
 
                     }
+                }
+
+                // Set default Content-Type
+                if (string.IsNullOrEmpty(request.ContentType))
+                {
+                    request.ContentType = CONTENTTYPE;
                 }
 
                 if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
@@ -999,22 +999,41 @@ namespace SQLAPI_Consumer
                                 request.Headers.Add(Header.Name, Header.Value);
                             }
 
-                            // Set default Content-Type
-                            if (string.IsNullOrEmpty(request.ContentType))
-                            {
-                                request.ContentType = CONTENTTYPE;
-                            }
                         }
 
                     }
                 }
 
-                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                // Set default Content-Type
+                if (string.IsNullOrEmpty(request.ContentType))
                 {
-                    if (!String.IsNullOrEmpty(JsonBody))
-                        streamWriter.Write(JsonBody);
+                    request.ContentType = CONTENTTYPE;
+                }
 
-                    streamWriter.Flush();
+                if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
+                {
+                    byte[] byteArray = System.Text.Encoding.UTF8.GetBytes((!String.IsNullOrEmpty(JsonBody)) ? JsonBody : "");
+                    // Set the ContentLength property of the WebRequest.  
+                    request.ContentLength = byteArray.Length;
+
+                    using (var streamWriter = request.GetRequestStream())
+                    {
+                        streamWriter.Write(byteArray, 0, byteArray.Length);
+                        // Close the Stream object.  
+                        streamWriter.Close();
+                        // Get the response.  
+
+                        streamWriter.Flush();
+                    }
+                }
+                else if (!String.IsNullOrEmpty(JsonBody)
+                        && !httpMethod.ToUpper().Contains("GET"))
+                {
+                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        streamWriter.Write(JsonBody);
+                        streamWriter.Flush();
+                    }
                 }
 
                 var httpResponse = (HttpWebResponse)request.GetResponse();
@@ -1090,15 +1109,14 @@ namespace SQLAPI_Consumer
                             {
                                 request.Headers.Add(Header.Name, Header.Value);
                             }
-
-                            // Set default Content-Type
-                            if (string.IsNullOrEmpty(request.ContentType))
-                            {
-                                request.ContentType = CONTENTTYPE;
-                            }
                         }
-
                     }
+                }
+
+                // Set default Content-Type
+                if (string.IsNullOrEmpty(request.ContentType))
+                {
+                    request.ContentType = CONTENTTYPE;
                 }
 
                 if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
