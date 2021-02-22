@@ -6,18 +6,165 @@ Welcome to SQL-APIConsumer project!. It's Database Project built in C# whose mai
 
 ## Getting Started
 
-This project has two main procedures defined below:
+The main procedure of this project is APICaller_Web_Extended, which can be used to call API of different web methods. It return an extended result including headers, and data of the server, within the result. In case we do need all these details, just need the results, instead we could use APICaller_WebMethod.
 
-1. **APICaller_GET(SqlString URL)**
+With these two extended procedures we are able to change the content-type, through the header parameter. 
+
+1. **SqlInt32 APICaller_Web_Extended(SqlString httpMethod, SqlString URL, SqlString Headers, SqlString JsonBody)**
+1. **SqlInt32 APICaller_WebMethod(SqlString httpMethod, SqlString URL, SqlString JsonBody)**
+
+**APICaller_Web_Extended**
+
+Below parameters received. This procedure return an integer depending on the execution. 0: Sucess. -1: Failed. 
+
+|Parameter	|Description						|Posible Value  |Sample		
+|    :---:     	|     :---:      					|:---           |:---           |
+|@httpMethod   	| HTTP Method that would be call    			|GET, POST, PUT,DELETE,PATCH|'GET'|
+|@URL		| URL intended to call					|Valid URL      |'https://www.routingnumbers.info/api/name.json?rn=122242597'|  
+|@Headers 	| Header related to request, if needed. 		|''             |'[{"Name": "Content-Type", "Value" :"text/javascript; charset=utf-8" }]'|
+|@JsonBody	| Json Body if needed. HTTP Get required a blank body	|''             |''|
+
+Returned information related to HTTP Response by APICaller_Web_Extended:
+
+|Parameter	|Description						|
+|    :---:     	|:---      						|
+|JsonResult   	| Result returned by API called				|
+|ContentType	| Returned Content Type					|
+|ServerName	| Server Name called					|
+|StatusCode	| HTTP Status Code reponse. Sample: 200,404,500		|
+|Description    | HTTP Status response. Sample: OK			|
+|Json_Headers   | Header result 					|
+
+
+### **Sample calling APICaller_Web_Extended: GET**
+
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/release_v2.3/images/Web_GET_Extended_Result.png)
+
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/release_v2.3/images/Web_GET_Extended_Query.png)
+
+```
+GO
+DECLARE @httpMethod nvarchar(max)	 = 'GET'
+DECLARE @URL nvarchar(max)			 = 'https://www.routingnumbers.info/api/name.json?rn=122242597'
+DECLARE @Headers nvarchar(max)		 = '[{"Name": "Content-Type", "Value" :"text/javascript; charset=utf-8" }]';
+
+DECLARE @JsonBody nvarchar(max)		 =  ''
+
+Declare @ts as table
+(
+	Json_Result nvarchar(max),
+	ContentType varchar(100),
+	ServerName varchar(100),
+	Statuscode varchar(100),
+	Descripcion varchar(100),
+	Json_Headers nvarchar(max)
+)
+
+DECLARE @i AS INT 
+ 
+INSERT INTO @ts
+
+EXECUTE @i =  [dbo].[APICaller_Web_Extended] 
+			   @httpMethod
+			  ,@URL
+			  ,@Headers
+			  ,@JsonBody
+
+SELECT * FROM @ts
+
+SELECT 
+		[name]	
+		,[rn]		
+		,[message]	
+		,[code]	
+ FROM (
+			SELECT Context = Json_Result 
+			  from @ts
+		)tb
+	OUTER APPLY OPENJSON  (context)  
+  WITH
+    ( [name]		VARCHAR(20) '$.name'
+	, [rn]			VARCHAR(20) '$.rn'
+	, [message]		VARCHAR(20) '$.message'
+	, [code]		INT			'$.code'
+    );
+
+SELECT  * 
+ FROM OPENJSON((select Json_Headers from @ts))  
+			WITH (   
+					 Header		NVARCHAR(MAX) '$."Name"'      
+					,Value		NVARCHAR(MAX) '$."Value"'      
+					) a
+```
+
+### **Sample calling APICaller_Web_Extended: POST**
+
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/release_v2.3/images/POST_Extended_Result.png)
+
+![alt text](https://github.com/geral2/SQL-APIConsumer/blob/release_v2.3/images/POST_Extended_query.png)
+
+```
+GO
+DECLARE @httpMethod nvarchar(max)	 = 'POST'
+DECLARE @URL nvarchar(max)			 = 'https://url-shortener-service.p.rapidapi.com/shorten'
+DECLARE @Headers nvarchar(max)		 =  '[{ "Name": "Content-Type", "Value" :"application/x-www-form-urlencoded" }
+										 ,{ "Name": "X-RapidAPI-Host","Value" :"url-shortener-service.p.rapidapi.com"}
+										 ,{ "Name": "X-RapidAPI-Key", "Value" :"c56b333d25mshdbfec15f02f096ep19fa94jsne5189032cf7d"}
+										 ,{"Name": "useQueryString","Value" :"true"}]';
+
+DECLARE @JsonBody nvarchar(max)		 =  'url=https://www.linkedin.com/in/geraldo-diaz/'
+
+Declare @ts as table
+(
+	Json_Result  NVARCHAR(MAX),
+	ContentType  VARCHAR(100),
+	ServerName   VARCHAR(100),
+	Statuscode   VARCHAR(100),
+	Descripcion  VARCHAR(100),
+	Json_Headers NVARCHAR(MAX)
+)
+
+DECLARE @i AS INT 
+ 
+INSERT INTO @ts
+EXECUTE @i =  [dbo].[APICaller_Web_Extended] 
+			   @httpMethod
+			  ,@URL
+			  ,@Headers
+			  ,@JsonBody
+
+ SELECT * FROM @ts
+
+SELECT 
+		Result = [name]	
+ FROM (
+			SELECT Context = Json_Result 
+			  from @ts
+		)tb
+	OUTER APPLY OPENJSON  (context)  
+  WITH
+    ( [name]		VARCHAR(20) '$.result_url' );
+
+SELECT  * 
+ FROM OPENJSON((select Json_Headers from @ts))  
+			WITH (   
+					 Header		NVARCHAR(MAX) '$."Name"'      
+					,Value		NVARCHAR(MAX) '$."Value"'      
+					) a
+```
+
+Initially the procedures below were the main objects of this project, but these were deprecated due the generic webmethod above:
+
+1. **APICaller_GET(SqlString URL)** 
 1. **APICaller_POST(SqlString URL, SqlString JsonBody)**
 
-The same also support Authentications header like Token or JWT.
+The same also support Authentications header like Token or JWT (Deprecated).
 
 1. **APICaller_GETAuth(SqlString URL, SqlString Authorization)**
 1. **APICaller_POSTAuth(SqlString URL, SqlString Authorization, SqlString JsonBody)**
 (More info in the wiki)
 
-It even support sending multiples headers in a Json Format.
+It even support sending multiples headers in a Json Format (Deprecated).
 
 1. **APICaller_GET_headers(SqlString URL, SqlString Headers)**
 1. **APICaller_POST_headers(SqlString URL, SqlString Headers)**
@@ -29,14 +176,6 @@ This new procedure is exclusive for Calling API with enconded contentType (appli
 
 1. **APICaller_GET_Extended(SqlString URL, SqlString Headers, SqlString JsonBody)**
 1. **APICaller_POST_Extended(SqlString URL, SqlString Headers, SqlString JsonBody)**
-
-With these two extended procedures we are able to change the content-type, through the header parameter. 
-And return information related to HTTP Response like:
-- ContentType
-- Server
-- StatusCode
-- Status Description
-- Response Headers
 
 There are a few Utilities functions;
 
@@ -92,7 +231,6 @@ USE [TestDB]
 GO
 EXEC dbo.sp_changedbowner @loginame = N'sa', @map = false
 GO
-WITH PERMISSION_SET = UNSAFE--external_access
 ```
 Error mentioned above:
 Msg 15404, Level 16, State 11, Line 1
@@ -143,6 +281,25 @@ If you do not know the path where this dll is located or this command above does
 After that we can create our CLR Stored procedures:
 
 ```
+GO
+	PRINT N'Creating [dbo].[APICaller_WebMethod]...';
+GO
+
+CREATE PROCEDURE [dbo].[APICaller_WebMethod]
+@httpMethod NVARCHAR (MAX) NULL, @URL NVARCHAR (MAX) NULL, @JsonBody NVARCHAR (MAX) NULL
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_WebMethod]
+
+
+GO
+	PRINT N'Creating [dbo].[APICaller_Web_Extended]...';
+GO
+
+CREATE PROCEDURE [dbo].[APICaller_Web_Extended]
+@httpMethod NVARCHAR (MAX) NULL, @URL NVARCHAR (MAX) NULL, @Headers NVARCHAR (MAX) NULL, @JsonBody NVARCHAR (MAX) NULL
+AS EXTERNAL NAME [API_Consumer].[StoredProcedures].[APICaller_Web_Extended]
+
+GO
+
 PRINT N'Creating [dbo].[Create_HMACSHA256]...';
 
 GO
