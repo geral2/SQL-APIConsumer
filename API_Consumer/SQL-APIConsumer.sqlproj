@@ -80,6 +80,7 @@
     <Compile Include="DTO\Header.cs" />
     <Compile Include="Procedures\UtilFunctions.cs" />
     <Compile Include="DTO\ExtendedResult.cs" />
+    <Compile Include="Procedures\APICallerGeneric.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

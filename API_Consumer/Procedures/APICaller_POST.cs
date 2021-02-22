@@ -126,18 +126,18 @@ public partial class StoredProcedures
     public static SqlInt32 APICaller_POST_Extended(SqlString URL, SqlString Headers, SqlString JsonBody)
     {
         SqlInt32 ExecutionResult = APIConsumer.DEFAULT_EXECUTION_RESULT;
+        API_Consumer.ExtendedResult ExtResult = new API_Consumer.ExtendedResult();
+
         try
         {
-            API_Consumer.ExtendedResult ExtResult = new API_Consumer.ExtendedResult();
-
             string Result = APIConsumer.POSTMethod_Extended(ref ExtResult, URL.ToString(), JsonBody.ToString(),  Headers.ToString());
 
-            Helper.SendResultValue(APIConsumer.DEFAULT_COLUMN_RESULT, Result);
+            Helper.SendResultValue(ExtResult);
 
         }
         catch (Exception ex)
         {
-            Helper.SendResultValue(APIConsumer.DEFAULT_COLUMN_ERROR, ex.Message.ToString());
+            Helper.SendResultValue(ExtResult);
             ExecutionResult = APIConsumer.FAILED_EXECUTION_RESULT;
         }
 
