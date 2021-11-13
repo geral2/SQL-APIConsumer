@@ -1101,13 +1101,56 @@ namespace SQLAPI_Consumer
                     {
                         if (!string.IsNullOrEmpty(Header.Name) && !string.IsNullOrEmpty(Header.Value))
                         {
-                            if (Header.Name.Contains(Header_ContentType))
+                            switch (Header.Name)
                             {
-                                request.ContentType = Header.Value;
-                            }
-                            else
-                            {
-                                request.Headers.Add(Header.Name, Header.Value);
+                                case Header_ContentType:
+                                    request.ContentType = Header.Value;
+                                break;
+                                case "Host":
+                                    request.Host = Header.Value;
+                                break;
+                                case "Referer":
+                                    request.Referer = Header.Value;
+                                    break;
+                                case "MediaType":
+                                    request.MediaType = Header.Value;
+                                    break;
+                                case "TransferEncoding":
+                                    request.TransferEncoding = Header.Value;
+                                    break;
+                                case "Accept":
+                                    request.Accept = Header.Value;
+                                    break;
+                                case "Connection":
+                                    request.Connection = Header.Value;
+                                    break;
+                                case "ConnectionGroupName":
+                                    request.ConnectionGroupName = Header.Value;
+                                    break;
+                                case "Expect":
+                                    request.Expect = Header.Value;
+                                    break;
+                                case "ContentLength":
+                                    request.ContentLength = long.Parse(Header.Value);
+                                    break;
+                                case "Pipelined":
+                                    request.Pipelined = bool.Parse(Header.Value);
+                                    break;
+                                case "AllowAutoRedirect":
+                                    request.AllowAutoRedirect = bool.Parse(Header.Value);
+                                    break;
+                                case "KeepAlive":
+                                    request.KeepAlive = bool.Parse(Header.Value);
+                                    break;
+                                case "ReadWriteTimeout":
+                                    request.ReadWriteTimeout = int.Parse(Header.Value);
+                                    break;
+                                case "Timeout":
+                                    request.Timeout = int.Parse(Header.Value);
+                                    break;
+                                default:
+                                    request.Headers.Add(Header.Name, Header.Value);
+                                    break;
                             }
                         }
                     }

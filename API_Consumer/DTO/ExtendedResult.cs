@@ -14,5 +14,6 @@ namespace API_Consumer
         public string Status { get; set; }
         public string ContentType { get; set; }
         public string Server { get; set; }
+
     }
 }
