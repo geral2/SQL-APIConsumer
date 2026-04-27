@@ -207,7 +207,6 @@ Set your database to TRUSTWORTHY mode on.
 ```
 ALTER DATABASE TESTDB SET TRUSTWORTHY ON
 ```
-
 ###### **STEP 3**
 Create Assembly System.Runtim.Serialization from .Net Framework. Confirm what version of .Net you have installed and modify the path below with the correct one.
 
@@ -262,23 +261,48 @@ Keep in mind, if you used a different path you will also neeed to modify the scr
 
 ### Installing
 
-Now we are ready to install (create) the clr objects of SQL-APIConsumer. Let's do it!.
+This project uses ILRepack to merge all required assemblies (including Newtonsoft.Json, System.Runtime.Serialization, etc.) into a single DLL. This approach has several advantages:
 
+1. Simplified deployment - only one DLL needs to be registered in SQL Server
+2. No dependency management - all required libraries are bundled together
+3. Reduced configuration errors - eliminates issues with missing assemblies or version conflicts
+
+We now provide multiple deployment options for different scenarios. **For detailed deployment instructions, see [API_Consumer/clr_files/README_deployment.md](API_Consumer/clr_files/README_deployment.md)**.
+
+### Quick Installation (Single Database)
 
 ###### **STEP 1**
-First, Let's create our Assembly:
+Create a folder named CLR in an accessible location and copy the DLL:
 
 ```
-CREATE ASSEMBLY [API_Consumer]
-AUTHORIZATION dbo
-FROM  N'C:\CLR\API_Consumer.dll'
-WITH PERMISSION_SET = UNSAFE
+C:\CLR\API_Consumer.dll
 ```
 
-If you do not know the path where this dll is located or this command above doesn't work. You could try with attached version in tag 2.0; 
- 
+Use the pre-built merged DLL from the `clr_files` folder or build from source.
+
 ###### **STEP 2**
-After that we can create our CLR Stored procedures:
+Choose your deployment method:
+
+**Option A: Single Database (Recommended for new users)**
+1. Use `deploy_single_db.sql` from the `clr_files` folder
+2. Edit the database name and DLL path at the top of the script
+3. Run in SQL Server Management Studio
+
+**Option B: Multiple Databases (Recommended for automation)**
+1. Use `deploy_multiple.ps1` PowerShell script
+2. Install SqlServer PowerShell module: `Install-Module -Name SqlServer`
+3. Run: `.\deploy_multiple.ps1 -TargetDatabases @("db1", "db2")`
+
+**Option C: Assembly Only**
+1. Use `register_assembly.sql` for basic assembly registration
+2. Manually create procedures using the scripts below
+
+### Legacy Installation (Manual Assembly Creation)
+
+If you prefer the manual approach or need to understand the individual steps:
+
+###### **STEP 3**
+After registering the assembly, create the CLR stored procedures and functions:
 
 ```
 GO
@@ -622,13 +646,16 @@ FROM 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.Serializati
 WITH PERMISSION_SET = UNSAFE
 ```
 
+> **Note**: The new deployment scripts use ILRepack to avoid this issue by merging all dependencies. See [API_Consumer/clr_files/README_deployment.md](API_Consumer/clr_files/README_deployment.md) for the recommended deployment methods.
+
 ## Deployment
 
 Make sure that the user on your SQL Server instance have grant access to CLR Folder where you stored the files.
 
 ## Built With
 
-* [C#](https://www.microsoft.com/en-us/download/details.aspx?id=7029/) - CLR develop in C# in .net framework 4.5.
+* [C#](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) - CLR develop in C# in .net framework 4.8.
+* [Visual Studio](https://visualstudio.microsoft.com/downloads) - This Project needs Visual Studio's build system
 * [SQL Server 2016+](https://www.microsoft.com/es-es/sql-server//) - Could be deployed in SQL server 2016 or later.
 
 If you are working in an older version like 2008 or 2012 you would need to keep this in mind:
@@ -647,7 +674,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * **Geraldo Diaz** - *SQL Developer* - [geral2](https://github.com/geral2)
 
-See also the list of [contributors](https://github.com/geral2/SQL-APIConsumer/projects/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/geral2/SQL-APIConsumer/graphs/contributors) who participated in this project.
 
 ## License
 

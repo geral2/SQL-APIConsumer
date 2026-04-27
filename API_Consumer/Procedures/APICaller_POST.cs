@@ -135,7 +135,7 @@ public partial class StoredProcedures
             Helper.SendResultValue(ExtResult);
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Helper.SendResultValue(ExtResult);
             ExecutionResult = APIConsumer.FAILED_EXECUTION_RESULT;

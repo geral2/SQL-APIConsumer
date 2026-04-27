@@ -16,18 +16,27 @@
     <AssemblyName>API_Consumer</AssemblyName>
     <ModelCollation>1033, CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
-    <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DeployToDatabase>False</DeployToDatabase>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
-    <SignAssembly>False</SignAssembly>
-    <AssemblyOriginatorKeyFile>Key.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>public_key.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>True</DelaySign>
     <PermissionSet>UNSAFE</PermissionSet>
     <TargetFrameworkProfile />
     <DacVersion>2.1.0.0</DacVersion>
+    <!-- Added property to skip SQL deployment -->
+    <GenerateSqlPackage>false</GenerateSqlPackage>
+    <BuildProjectOnDeploy>false</BuildProjectOnDeploy>
+    <!-- Added properties for ILRepack -->
+    <ILRepackPackage>ILRepack</ILRepackPackage>
+    <ILRepackVersion>2.0.40</ILRepackVersion>
+    <ILRepackOutputAssembly>$(OutputPath)Merged\$(AssemblyName).dll</ILRepackOutputAssembly>
+    <ILRepackKeyFile>$(ProjectDir)$(AssemblyOriginatorKeyFile)</ILRepackKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -67,6 +76,8 @@
     <Folder Include="DTO" />
     <Folder Include="Procedures" />
     <Folder Include="Consumers" />
+    <Folder Include="clr_files" />
+    <Folder Include="dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Procedures\APICaller_POST.cs" />
@@ -87,18 +98,73 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
       <HintPath>dll\Newtonsoft.Json.dll</HintPath>
-      <SpecificVersion>True</SpecificVersion>
-      <GenerateSqlClrDdl>True</GenerateSqlClrDdl>
-      <SqlPermissionSet>UNSAFE</SqlPermissionSet>
     </Reference>
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Text.Encoding" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Net.Primitives" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Key.pfx" />
+    <None Include="public_key.snk" />
+    <None Include="API_Consumer.dll" />
+    <None Include="Newtonsoft.Json.dll" />
+    <None Include="clr_files\API_Consumer.dll" />
+    <None Include="dll\APIConsumer.dll" />
+    <None Include="dll\Newtonsoft.Json.dll" />
+    <None Include="dll\System.Net.Http.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="clr_files\register_assembly.sql" />
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
+    <!-- ILRepack as post-build event - updated with reliable download and execution -->
+    <PostBuildEvent>
+      @echo ===== Starting ILRepack Merge Process =====
+      
+      @echo Setting up working directory
+      cd "$(ProjectDir)"
+      
+      @echo Creating packages directory if it doesn't exist
+      if not exist "$(ProjectDir)packages" mkdir "$(ProjectDir)packages"
+      
+      @echo Creating merged output directory
+      if not exist "$(OutputPath)Merged" mkdir "$(OutputPath)Merged"
+      
+      @echo Downloading NuGet if needed
+      if not exist "$(ProjectDir)packages\nuget.exe" powershell -Command "Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile '$(ProjectDir)packages\nuget.exe'"
+      
+      @echo Checking for ILRepack
+      if not exist "$(ProjectDir)packages\$(ILRepackPackage).$(ILRepackVersion)" (
+        @echo Installing ILRepack via NuGet
+        "$(ProjectDir)packages\nuget.exe" install $(ILRepackPackage) -Version $(ILRepackVersion) -OutputDirectory "$(ProjectDir)packages"
+      )
+      
+      @echo Locating ILRepack executable
+      for /f "tokens=*" %%a in ('dir /b /s "$(ProjectDir)packages\$(ILRepackPackage).$(ILRepackVersion)\tools\ILRepack.exe"') do set ILREPACK_EXE=%%a
+      
+      @echo Running ILRepack to merge assemblies
+      "%ILREPACK_EXE%" /target:library /targetplatform:v4 /keyfile:"$(ProjectDir)public_key.snk" /delaysign /out:"$(OutputPath)Merged\$(AssemblyName).dll" "$(OutputPath)$(AssemblyName).dll" "$(ProjectDir)dll\Newtonsoft.Json.dll" "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.Serialization.dll" "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.ServiceModel.Internals.dll" "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Net.Http.dll" "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\SMDiagnostics.dll"
+      
+      @echo Creating SQL registration script
+      @echo -- SQL script for registering merged assembly &gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo USE [master] &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo GO &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo -- Drop existing assembly if it exists &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo IF EXISTS (SELECT * FROM sys.assemblies WHERE name = 'API_Consumer') &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo BEGIN &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo     DROP ASSEMBLY [API_Consumer] &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo END &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo GO &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo CREATE ASSEMBLY [API_Consumer] FROM '$(OutputPath)Merged\$(AssemblyName).dll' WITH PERMISSION_SET = UNSAFE; &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      @echo GO &gt;&gt; "$(OutputPath)Merged\RegisterAssembly.sql"
+      
+      @echo ===== ILRepack Merge Process Completed =====
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

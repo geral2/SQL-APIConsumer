@@ -1,9 +1,32 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2043
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SQL-APIConsumer", "API_Consumer\SQL-APIConsumer.sqlproj", "{3026EF9E-7AF6-4BAF-B9C6-338F536E091A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루션 항목", "{2A3A057F-5D22-31FD-628C-DF5EF75AEF1E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		APICaller_GET ResultSet.png = APICaller_GET ResultSet.png
+		APICaller_GET_headers ResultSet.png = APICaller_GET_headers ResultSet.png
+		Diagram.png = Diagram.png
+		LICENSE = LICENSE
+		images\POST_Extended_query.png = images\POST_Extended_query.png
+		images\POST_Extended_Result.png = images\POST_Extended_Result.png
+		README.md = README.md
+		images\Web_GET_Extended_Query.png = images\Web_GET_Extended_Query.png
+		images\Web_GET_Extended_Result.png = images\Web_GET_Extended_Result.png
+		_config.yml = _config.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
+	ProjectSection(SolutionItems) = preProject
+		images\POST_Extended_query.png = images\POST_Extended_query.png
+		images\POST_Extended_Result.png = images\POST_Extended_Result.png
+		images\Web_GET_Extended_Query.png = images\Web_GET_Extended_Query.png
+		images\Web_GET_Extended_Result.png = images\Web_GET_Extended_Result.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +43,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C8D5274F-AC00-46C7-1F8D-E88E81087A52} = {2A3A057F-5D22-31FD-628C-DF5EF75AEF1E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C223CB8E-223F-4472-BDDA-F4F8BA456E0D}

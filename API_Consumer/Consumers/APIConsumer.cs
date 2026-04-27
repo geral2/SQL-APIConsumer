@@ -5,6 +5,10 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using API_Consumer;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace SQLAPI_Consumer
 {
@@ -61,6 +65,9 @@ namespace SQLAPI_Consumer
         public const string DEFAULT_COLUMN_ERROR = "Error";
 
         private enum ParamsName { webMethod , URL }
+
+        // Add static HttpClient instance
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         /// <summary>
         /// POST to Resful API sending Json body.
@@ -1081,142 +1088,175 @@ namespace SQLAPI_Consumer
         /// <returns></returns>
         public static string WebMethod_Extended(ref ExtendedResult extResult, string httpMethod, string url, string JsonBody = "", string Headers = "")
         {
-            string ContentResult = string.Empty;
+            // Create a local copy to work with
+            ExtendedResult localResult = extResult ?? new ExtendedResult();
+            
+            // Call the async method and wait for it synchronously without using Task.Run with ref parameter
+            string result = WebMethod_ExtendedAsync(localResult, httpMethod, url, JsonBody, Headers).GetAwaiter().GetResult();
+            
+            // Copy the local result back to the ref parameter
+            extResult = localResult;
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// Async implementation of the WebMethod_Extended to avoid ref parameter in lambda issues
+        /// </summary>
+        private static async Task<string> WebMethod_ExtendedAsync(ExtendedResult extResult, string httpMethod, string url, string JsonBody = "", string Headers = "")
+        {
+            string contentResult = string.Empty;
+            HttpResponseMessage response = null;
             try
             {
                 SetSSL();
-
                 validateParams(ParamsName.webMethod, httpMethod);
                 validateParams(ParamsName.URL, url);
-
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-
-                request.Method = httpMethod;
-
+                
+                var request = new HttpRequestMessage(new HttpMethod(httpMethod), url);
+                
+                // Add headers
                 if (!string.IsNullOrEmpty(Headers))
                 {
                     List<Headers> _headers = JsonConvert.DeserializeObject<List<Headers>>(Headers);
-
-                    foreach (var Header in _headers)
+                    foreach (var header in _headers)
                     {
-                        if (!string.IsNullOrEmpty(Header.Name) && !string.IsNullOrEmpty(Header.Value))
+                        if (!string.IsNullOrEmpty(header.Name) && !string.IsNullOrEmpty(header.Value))
                         {
-                            if (Header.Name.Contains(Header_ContentType))
+                            if (header.Name.Contains(Header_ContentType))
                             {
-                                request.ContentType = Header.Value;
+                                // Don't set content-type header directly on the request
+                                // Store it for when we create the content
+                                continue;
                             }
                             else
                             {
-                                request.Headers.Add(Header.Name, Header.Value);
+                                request.Headers.Add(header.Name, header.Value);
                             }
                         }
                     }
                 }
-
-                // Set default Content-Type
-                if (string.IsNullOrEmpty(request.ContentType))
+                
+                // Add content based on content type
+                string contentType = CONTENTTYPE; // Default content type
+                
+                if (!string.IsNullOrEmpty(Headers))
                 {
-                    request.ContentType = CONTENTTYPE;
-                }
-
-                if (request.ContentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
-                {
-                    byte[] byteArray = System.Text.Encoding.UTF8.GetBytes((!String.IsNullOrEmpty(JsonBody)) ? JsonBody : "");
-                    // Set the ContentLength property of the WebRequest.  
-                    request.ContentLength = byteArray.Length;
-
-                    using (var streamWriter = request.GetRequestStream())
+                    List<Headers> _headers = JsonConvert.DeserializeObject<List<Headers>>(Headers);
+                    foreach (var header in _headers)
                     {
-                        streamWriter.Write(byteArray, 0, byteArray.Length);
-                        // Close the Stream object.  
-                        streamWriter.Close();
-                        // Get the response.  
-
-                        streamWriter.Flush();
-                    }
-                }
-                else if (!String.IsNullOrEmpty(JsonBody) 
-                        && !httpMethod.ToUpper().Contains("GET") )
-                {
-                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-                    {
-                        streamWriter.Write(JsonBody);
-                        streamWriter.Flush();
-                    }
-                }
-
-                var httpResponse = (HttpWebResponse)request.GetResponse();
-
-                if (httpResponse != null)
-                {
-                    extResult.ContentType = httpResponse.ContentType;
-                    extResult.Server = httpResponse.Server;
-                    extResult.StatusCode = ((int)httpResponse.StatusCode).ToString();
-                    extResult.StatusDescription = httpResponse.StatusDescription;
-                }
-
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    var result = streamReader.ReadToEnd();
-                    extResult.Result = ContentResult = result;
-
-                    for (int i = 0; i < httpResponse.Headers.Count; ++i)
-                    {
-                        extResult.headers.Add(
-                                                   new Headers()
-                                                   {
-                                                       Name = httpResponse.Headers.Keys[i],
-                                                       Value = httpResponse.Headers[i]
-                                                   }
-                                            );
-                    }
-
-                }
-            }
-            catch (WebException ex)
-            {
-                using (var stream = ex.Response?.GetResponseStream())
-                {
-                    if (stream != null)
-                    {
-                        var response = ex.Response as HttpWebResponse;
-                        if (response != null)
+                        if (!string.IsNullOrEmpty(header.Name) && header.Name.Contains(Header_ContentType))
                         {
-                            extResult.StatusCode = ((int)response.StatusCode).ToString();
-                            extResult.StatusDescription = response.StatusDescription;
-                            extResult.ContentType = response.ContentType;
-                            extResult.Server = response.Server;
+                            contentType = header.Value;
+                            break;
                         }
-
-                        using (var reader = new StreamReader(stream))
+                    }
+                }
+                
+                if (!string.IsNullOrEmpty(JsonBody) && httpMethod.ToUpper() != "GET")
+                {
+                    if (contentType.ToLower() == CONTENTTYPE_URLENCODED.ToLower())
+                    {
+                        request.Content = new StringContent(JsonBody, Encoding.UTF8, "application/x-www-form-urlencoded");
+                    }
+                    else
+                    {
+                        request.Content = new StringContent(JsonBody, Encoding.UTF8, "application/json");
+                    }
+                }
+                
+                // Execute request
+                response = await _httpClient.SendAsync(request);
+                
+                // Populate extended result with HTTP info
+                extResult.StatusCode = ((int)response.StatusCode).ToString();
+                extResult.StatusDescription = response.ReasonPhrase;
+                extResult.ContentType = response.Content.Headers.ContentType?.MediaType;
+                extResult.Server = response.Headers.Server?.ToString();
+                
+                // Get response content
+                contentResult = await response.Content.ReadAsStringAsync();
+                extResult.Result = contentResult;
+                
+                // Add response headers
+                foreach (var header in response.Headers)
+                {
+                    extResult.headers.Add(new Headers { Name = header.Key, Value = string.Join(",", header.Value) });
+                }
+                
+                // Add content headers too
+                foreach (var header in response.Content.Headers)
+                {
+                    extResult.headers.Add(new Headers { Name = header.Key, Value = string.Join(",", header.Value) });
+                }
+                
+                return contentResult;
+            }
+            catch (HttpRequestException ex)
+            {
+                extResult.Result = ex.Message;
+                
+                // Handle StatusCode property which may not exist in older .NET versions
+                try
+                {
+                    // Use reflection to safely check for StatusCode property
+                    var statusCodeProperty = ex.GetType().GetProperty("StatusCode");
+                    if (statusCodeProperty != null)
+                    {
+                        var statusCode = statusCodeProperty.GetValue(ex) as HttpStatusCode?;
+                        if (statusCode.HasValue)
                         {
-                            var result = reader.ReadToEnd();
-                            extResult.Result = ContentResult = result;
+                            extResult.StatusCode = ((int)statusCode.Value).ToString();
+                            extResult.StatusDescription = statusCode.Value.ToString();
+                        }
+                        else
+                        {
+                            extResult.StatusCode = "500";
+                            extResult.StatusDescription = "Internal Server Error";
                         }
                     }
                     else
                     {
-                        ContentResult = ex.Message.ToString();
-                        extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
-                        extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
-                    }
-
-                    if (string.IsNullOrEmpty(extResult.Result))
-                    {
-                        extResult.Result = ContentResult;
+                        extResult.StatusCode = "500";
+                        extResult.StatusDescription = "Internal Server Error";
                     }
                 }
+                catch
+                {
+                    // Fallback if reflection fails
+                    extResult.StatusCode = "500";
+                    extResult.StatusDescription = "Internal Server Error";
+                }
+                
+                // Include inner exception details if available
+                if (ex.InnerException != null)
+                {
+                    extResult.Result += $" | Inner error: {ex.InnerException.Message}";
+                }
+                
+                return extResult.Result;
             }
-            catch (Exception ex)
+            catch (TaskCanceledException)
             {
-                ContentResult = ex.Message.ToString();
-                extResult.Result = ContentResult;
-                extResult.StatusCode = ((int)HttpStatusCode.InternalServerError).ToString();
-                extResult.StatusDescription = HttpStatusCode.InternalServerError.ToString();
-                throw ex;
+                extResult.Result = "Request timed out or was canceled";
+                extResult.StatusCode = "408"; // Request Timeout
+                extResult.StatusDescription = "Request Timeout";
+                return extResult.Result;
             }
-
-            return ContentResult;
+            catch (JsonException ex)
+            {
+                extResult.Result = $"JSON parsing error: {ex.Message}";
+                extResult.StatusCode = "400";
+                extResult.StatusDescription = "Bad Request - Invalid JSON";
+                return extResult.Result;
+            }
+            catch (Exception)
+            {
+                extResult.Result = "An unexpected error occurred";
+                extResult.StatusCode = response?.StatusCode != null ? ((int)response.StatusCode).ToString() : "500";
+                extResult.StatusDescription = response?.ReasonPhrase ?? "Internal Server Error";
+                return extResult.Result;
+            }
         }
 
         private static void validateParams(ParamsName pname, string paramVal)
@@ -1226,23 +1266,23 @@ namespace SQLAPI_Consumer
             switch (pname)
             {
                 case ParamsName.webMethod:
-                    
-                    if (string.IsNullOrEmpty(paramVal) || !ContainAnyOf(paramVal, methods))
-                    {
-                        throw new ArgumentNullException(pname.ToString(), "Please provide a valid HTTP method (GET,POST,PUT,PATCH, DELETE).");
-                    }
                     if (string.IsNullOrEmpty(paramVal))
-                    {
-                        throw new ArgumentNullException(pname.ToString(), "Please provide a valid HTTP method (GET,POST,PUT,PATCH, DELETE).");
-                    }
-
-                    break;
+                        throw new ArgumentNullException(pname.ToString(), "HTTP method cannot be null or empty.");
+                
+                // Ensure method is uppercase and in valid list
+                string upperMethod = paramVal.ToUpperInvariant();
+                if (!ContainAnyOf(upperMethod, methods))
+                    throw new ArgumentException("Please provide a valid HTTP method (GET, POST, PUT, PATCH, DELETE).", pname.ToString());
+                break;
+            
                 case ParamsName.URL:
                     if (string.IsNullOrEmpty(paramVal))
-                    {
-                        throw new ArgumentNullException(pname.ToString(), "Please provide a valid URL.");
-                    }
-                    break;
+                        throw new ArgumentNullException(pname.ToString(), "URL cannot be null or empty.");
+                
+                // Validate URL format
+                if (!Uri.IsWellFormedUriString(paramVal, UriKind.Absolute))
+                    throw new ArgumentException("Please provide a valid absolute URL.", pname.ToString());
+                break;
             }
         }
 
@@ -1266,11 +1306,8 @@ namespace SQLAPI_Consumer
 
         private static void SetSSL()
         {
-            System.Net.ServicePointManager.ServerCertificateValidationCallback = (senderX, certificate, chain, sslPolicyErrors) => { return true; };
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                                                 | SecurityProtocolType.Ssl3 
-                                                 | (SecurityProtocolType)3072;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+            ServicePointManager.ServerCertificateValidationCallback = null; // Use default validation
         }
     }
 }

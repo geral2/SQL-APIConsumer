@@ -14,6 +14,14 @@ namespace SQLAPI_Consumer
     /// </summary>
     public  static class Helper
     {
+        private static readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
+        {
+            // https://github.com/advisories/GHSA-5crp-9r3c-p9vr related codes
+            MaxDepth = 128, // Recommended depth limit
+            CheckAdditionalContent = true,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat
+        };
+
         /// <summary>
         /// Static method used to Send multiple columns as result set thought Lists of string.
         /// </summary>
@@ -107,13 +115,15 @@ namespace SQLAPI_Consumer
 
             if (SqlContext.Pipe.IsSendingResults)
             {
+                string headersJson = JsonConvert.SerializeObject(extResult.headers, _serializerSettings);
+
                 Record.SetValues(
                                  extResult.Result
                                 , extResult.ContentType
                                 , extResult.Server
                                 , extResult.StatusCode
                                 , extResult.StatusDescription
-                                , JsonConvert.SerializeObject(extResult.headers)
+                                , headersJson
                                 );
 
                 SqlContext.Pipe.SendResultsRow(Record);
@@ -170,14 +180,12 @@ namespace SQLAPI_Consumer
         /// <returns>string SHA256</returns>
         public static string CreateSignature(string message, string secret)
         {
-
-            byte[] keyBytes = SignatureEncoding.GetBytes(secret);
-            byte[] messageBytes = SignatureEncoding.GetBytes(message);
-            HMACSHA256 hmacsha256 = new HMACSHA256(keyBytes);
-
-            byte[] bytes = hmacsha256.ComputeHash(messageBytes);
-
-            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            using (HMACSHA256 hmacsha256 = new HMACSHA256(SignatureEncoding.GetBytes(secret)))
+            {
+                byte[] messageBytes = SignatureEncoding.GetBytes(message);
+                byte[] bytes = hmacsha256.ComputeHash(messageBytes);
+                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            }
         }
 
         /// <summary>
@@ -219,8 +227,11 @@ namespace SQLAPI_Consumer
         /// <returns>Base64 string</returns>
         public static string GetBytes_Encoding_ASCII(string _value)
         {
-            var byteArray = Encoding.ASCII.GetBytes(_value);
 
+            if (string.IsNullOrEmpty(_value))
+                return string.Empty;
+
+            var byteArray = Encoding.ASCII.GetBytes(_value);
             return Convert.ToBase64String(byteArray);
         }
 
@@ -230,8 +241,11 @@ namespace SQLAPI_Consumer
         /// <returns>Base64 string</returns>
         public static string GetBytes_Encoding_UTF8(string _value)
         {
-            var byteArray = Encoding.UTF8.GetBytes(_value);
 
+            if (string.IsNullOrEmpty(_value))
+                return string.Empty;
+
+            var byteArray = Encoding.UTF8.GetBytes(_value);
             return Convert.ToBase64String(byteArray);
         }
     }
