@@ -14,6 +14,16 @@ namespace SQLAPI_Consumer
     /// </summary>
     public  static class Helper
     {
+        static Helper()
+        {
+            // Add this static constructor to set global JSON parsing depth limit
+            // https://github.com/advisories/GHSA-5crp-9r3c-p9vr related codes
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings 
+            { 
+                MaxDepth = 128 // Recommended depth limit
+            };
+        }
+
         /// <summary>
         /// Static method used to Send multiple columns as result set thought Lists of string.
         /// </summary>
