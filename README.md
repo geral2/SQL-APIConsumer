@@ -430,10 +430,8 @@ AS EXTERNAL NAME [API_Consumer].[StoredProcedures].APICaller_POST_Encoded
 -- How to show Json results.
 
 ```
-DECLARE @RoutingNumber AS VARCHAR(50) = '122242597'
-
---Public API: routingnumbers.info
-DECLARE @Url  VARCHAR(200) = CONCAT('https://www.routingnumbers.info/api/name.json?','rn=',@RoutingNumber) 
+--Public API: api.restful-api.dev
+DECLARE @Url  VARCHAR(200) = 'https://api.restful-api.dev/objects'
 
 DECLARE @Results AS TABLE
 (
@@ -455,11 +453,7 @@ EXEC  [dbo].[APICaller_GET] @Url
 	OUTER APPLY OPENJSON  (context) B
 
 --Result: column per value.
-SELECT 
-		[name]	
-		,[rn]		
-		,[message]	
-		,[code]	
+SELECT  *
  FROM (
 			SELECT Context 
 			  from @Results
@@ -467,9 +461,10 @@ SELECT
 	OUTER APPLY OPENJSON  (context)  
   WITH
     ( [name]		VARCHAR(20) '$.name'
-	, [rn]			VARCHAR(20) '$.rn'
-	, [message]		VARCHAR(20) '$.message'
-	, [code]		INT			'$.code'
+	, [id]			VARCHAR(20) '$.id'
+	, [color]		VARCHAR(20) '$.data.color' 
+	, [price]		MONEY		'$.data.price'
+	, [data]		NVARCHAR(MAX) '$.data' AS JSON
     );
 ```
 
@@ -494,9 +489,11 @@ Declare @ts as table(Json_Table nvarchar(max))
 
  insert into @ts
  --Get Account Data
- exec [dbo].APICaller_GET_headers
-							@wurl
+  exec [dbo].[APICaller_Web_Extended]
+							'GET'
+							,@wurl
 							,@header
+							,''
 
 SELECT  * 
  FROM OPENJSON((select * from @ts))  

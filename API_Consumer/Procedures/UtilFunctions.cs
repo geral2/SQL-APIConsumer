@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using API_Consumer;
 using Microsoft.SqlServer.Server;
+using Newtonsoft.Json;
 using SQLAPI_Consumer;
 
 public partial class UserDefinedFunctions
@@ -59,4 +62,70 @@ public partial class UserDefinedFunctions
                                                         );
         return valueReturned;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="httpMethod"></param>
+    /// <param name="URL"></param>
+    /// <param name="Headers"></param>
+    /// <param name="JsonBody"></param>
+    /// <returns></returns>
+    [Microsoft.SqlServer.Server.SqlFunction(
+       FillRowMethodName = "FillResult",
+       TableDefinition   = "Result nvarchar(max), StatusCode nvarchar(50), StatusDescription nvarchar(200),ContentType nvarchar(200),Server nvarchar(200), Headers nvarchar(MAX)")]
+
+    public static IEnumerable tvf_APICaller_Web_Extended(SqlString httpMethod, SqlString URL, SqlString Headers, SqlString JsonBody)
+    {
+        SqlInt32 ExecutionResult = APIConsumer.DEFAULT_EXECUTION_RESULT;
+        API_Consumer.ExtendedResult ExtResult = new API_Consumer.ExtendedResult();
+        ArrayList _webResults = new ArrayList();
+        try
+        {
+            string Result = APIConsumer.WebMethod_Extended(ref ExtResult, httpMethod.ToString(), URL.ToString(), JsonBody.ToString(), Headers.ToString());
+
+            _webResults.Add(new WebExtendedResult(    (SqlString) ExtResult.Result
+                                                    , (SqlString) ExtResult.StatusCode
+                                                    , (SqlString) ExtResult.StatusDescription
+                                                    , (SqlString) ExtResult.ContentType
+                                                    , (SqlString) ExtResult.Server
+                                                    , (SqlString) JsonConvert.SerializeObject(ExtResult.headers)
+                                                    ));
+            return _webResults;
+        }
+        catch (Exception ex)
+        {
+            string safeErrMessage = ex.Message.Length > 400 ? ex.Message.Substring(0, 400) : ex.Message;
+            string safeMessage = ex.Message.Length > 190 ? ex.Message.Substring(0, 190) : ex.Message;
+            string safeSource = (ex.Source ?? "").Length > 190 ? ex.Source.Substring(0, 190) : (ex.Source ?? "");
+
+            _webResults.Add((object)new WebExtendedResult((SqlString)safeErrMessage
+                                                  , (SqlString)"400"
+                                                  , (SqlString)safeMessage
+                                                  , (SqlString)"ERROR"
+                                                  , (SqlString)safeSource
+                                                  , (SqlString)""
+                                                  ));
+            return _webResults;
+        }
+    }
+    //FillRow method. The method name has been specified above as a SqlFunction attribute property
+    public static void FillResult(object objWebResult 
+                                , out SqlString Result
+                                , out SqlString StatusCode
+                                , out SqlString StatusDescription
+                                , out SqlString ContentType
+                                , out SqlString Server
+                                , out SqlString Headers
+                                )
+    {
+        WebExtendedResult _webResult = (WebExtendedResult)objWebResult;
+        Result = _webResult.Result;
+        StatusCode = _webResult.StatusCode;
+        StatusDescription = _webResult.StatusDescription;
+        ContentType = _webResult.ContentType;
+        Server = _webResult.Server;
+        Headers = _webResult.Headers;
+    }
 }
+
